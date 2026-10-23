@@ -1,0 +1,4 @@
+model,resolution,precision,recall,mAP50,mAP50_95,training_hours
+YOLO11n,480,0.714,0.565,0.576,0.342,
+YOLO11n,640,0.704,0.622,0.647,0.355,1.148
+YOLO11n,800,0.775,0.642,0.646,0.343,1.719
