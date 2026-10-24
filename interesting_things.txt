@@ -1,3 +1,0 @@
-Things I found interesting/difficult this week:
-- Setting up Git in Colab
-- Understanding Git branch merging

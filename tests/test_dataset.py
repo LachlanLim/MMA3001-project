@@ -2,11 +2,19 @@
 """Tests for the pork-packaging defect dataset configuration."""
 
 from pathlib import Path
+
+import pytest
 import yaml
 
 
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
 YAML_PATH = DATASET_DIR / "data.yaml"
+
+# These tests need the downloaded dataset, which is not stored in Git.
+pytestmark = pytest.mark.skipif(
+    not DATASET_DIR.is_dir(),
+    reason="Dataset not downloaded (run src/download_data.py).",
+)
 
 EXPECTED_CLASSES = [
     "loose-meat",
