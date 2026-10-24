@@ -1,0 +1,25 @@
+PyTorch profile: yolo11n_640, 20 photos at 640 px
+operations_per_image: 1188
+convolutions_per_image: 88
+profiled_cpu_ms: 7.3
+
+--------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                  Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls  
+--------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+              aten::miopen_convolution        58.23%      85.278ms        66.70%      97.684ms      60.299us          1620  
+                            aten::add_         6.10%       8.936ms         6.10%       8.936ms       5.136us          1740  
+                         aten::nonzero         4.56%       6.680ms         4.78%       6.995ms     116.579us            60  
+                    aten::_convolution         4.34%       6.359ms        74.33%     108.862ms      61.854us          1760  
+                           aten::silu_         4.17%       6.109ms         4.17%       6.109ms       3.967us          1540  
+                           aten::copy_         4.04%       5.921ms         4.04%       5.921ms      14.097us           420  
+    aten::miopen_depthwise_convolution         2.77%       4.052ms         3.29%       4.819ms      34.421us           140  
+                             aten::cat         1.96%       2.874ms         1.96%       2.874ms       6.533us           440  
+                             aten::bmm         1.95%       2.854ms         1.95%       2.854ms      71.344us            40  
+                            aten::view         1.60%       2.349ms         1.60%       2.349ms       1.140us          2060  
+                          aten::conv2d         1.04%       1.526ms        76.36%     111.840ms      63.545us          1760  
+                     aten::convolution         0.99%       1.452ms        75.32%     110.314ms      62.678us          1760  
+                         aten::reshape         0.92%       1.353ms         2.64%       3.868ms       2.015us          1920  
+                             aten::add         0.91%       1.330ms         0.91%       1.330ms       3.694us           360  
+                         aten::resize_         0.64%     934.250us         0.64%     934.250us       0.497us          1880  
+--------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 146.463ms

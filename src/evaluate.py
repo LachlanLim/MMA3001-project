@@ -18,6 +18,7 @@ minute.
 | Inference time | Time for the model to check one photo | Whether it keeps up with the line |
 | Peak memory | Graphics-card memory used | Whether it fits on smaller devices |
 | Training time | Hours to train | Cost of retraining when new defect types appear |
+| Profile | Which operations the processor spends its time on | Explains *why* the speeds are what they are |
 
 Speed is measured one photo at a time, as on a line where packs arrive
 one by one. Ten photos are checked first as a warm-up (the first few
@@ -64,10 +65,10 @@ Comparison on the validation photos (AMD Radeon RX 9070 XT):
 
 | Model | Resolution | mAP50 | GFLOPs | Inference (ms) | Memory (MB) | Training (h) |
 |---|---|---|---|---|---|---|
-| YOLO11n | 480 | 0.576 | 3.6 | 7.6 | 65 | 0.73 |
-| **YOLO11n** | **640** | **0.647** | 6.4 | 7.7 | 94 | 1.15 |
-| YOLO11n | 800 | 0.646 | 10.1 | 7.4 | 120 | 1.72 |
-| YOLO11s | 640 | 0.563 | 21.4 | 7.9 | 143 | 1.35 |
+| YOLO11n | 480 | 0.576 | 3.6 | 7.5 | 32 | 0.73 |
+| **YOLO11n** | **640** | **0.647** | 6.4 | 7.6 | 39 | 1.15 |
+| YOLO11n | 800 | 0.646 | 10.1 | 7.4 | 50 | 1.72 |
+| YOLO11s | 640 | 0.563 | 21.4 | 7.9 | 109 | 1.35 |
 
 YOLO11n at 640 px was chosen: it is the most accurate, and the larger
 options cost more memory and training time for no gain.
@@ -92,10 +93,22 @@ training photos.
 
 **A surprising result:** every model takes about the same time per photo
 (7.4 to 7.9 ms), even though the largest needs six times the arithmetic
-of the smallest. When photos are checked one at a time, the graphics
-card spends most of its time on fixed start-up work for each photo, not
-on arithmetic. So on this hardware the model size affects memory and
-training time, not inspection speed.
+of the smallest.
+
+The profiler explains why:
+
+- Every model runs the same 88 convolution layers and about 1,200
+  PyTorch operations per photo. The larger model does more arithmetic
+  *inside* each operation, but not more operations.
+- Preparing and sending each operation to the graphics card has a fixed
+  cost. Together, these costs come to about 7 ms of processor time per
+  photo, which is roughly the whole inference time.
+- The graphics card finishes the arithmetic faster than the processor
+  can hand it new work, so it spends most of its time waiting.
+
+On this hardware, model size therefore affects memory and training time,
+not inspection speed. Checking several photos at once (batching) would
+spread the fixed cost and make the arithmetic matter again.
 
 ## Outputs
 
@@ -103,44 +116,66 @@ training time, not inspection speed.
 - ``results/resolution_comparison.csv``: YOLO11n at 480, 640 and 800 px
 - ``results/final_test_metrics.csv``: per-defect test results for the
   chosen model
+- ``results/profiles/<experiment>.txt``: profiler breakdown of the
+  operations that took the most processor time
 - ``runs/detect/evaluation/``: Ultralytics plots (confusion matrices,
   precision-recall curves)
 """
 
 import csv
+import gc
 import statistics
 import time
 from pathlib import Path
 
 import torch
 from PIL import Image
+from torch.profiler import ProfilerActivity, profile
 from ultralytics import YOLO
 from ultralytics.utils.torch_utils import get_flops
 
 
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
+"""Folder holding the downloaded dataset."""
+
 DATA_YAML = DATASET_DIR / "data.yaml"
+"""Dataset settings file listing the defect types and photo folders."""
 
 TRAINING_DIR = Path("runs/detect/results/training")
-# Ultralytics saves relative project folders inside runs/detect
-EVALUATION_DIR = Path("evaluation")
-RESULTS_DIR = Path("results")
+"""Where Ultralytics saved each training run and its trained model."""
 
-# Experiment name, model label, input resolution and Ultralytics run folder
+EVALUATION_DIR = Path("evaluation")
+"""Where Ultralytics saves evaluation plots. Ultralytics puts relative
+folders inside ``runs/detect``, so this becomes ``runs/detect/evaluation``."""
+
+RESULTS_DIR = Path("results")
+"""Where the comparison tables (CSV files) are saved."""
+
+PROFILES_DIR = RESULTS_DIR / "profiles"
+"""Where the profiler's breakdown for each model is saved."""
+
 EXPERIMENTS = [
     ("yolo11n_480", "YOLO11n", 480, "yolo11n_480"),
     ("yolo11n_640", "YOLO11n", 640, "yolo11n_baseline"),
     ("yolo11n_800", "YOLO11n", 800, "yolo11n_800"),
     ("yolo11s_640", "YOLO11s", 640, "yolo11s_baseline"),
 ]
+"""The four trained models to compare, each given as
+(experiment name, model label, resolution in pixels, training run folder)."""
 
-# The model chosen from the validation results, evaluated on the test split
 SELECTED_EXPERIMENT = "yolo11n_640"
+"""The model chosen from the validation results. Only this one is
+evaluated on the test photos."""
 
-# Images run before timing starts, so GPU start-up cost is not measured
 WARMUP_IMAGES = 10
+"""Photos checked before timing starts, so the graphics card's one-off
+start-up delay is not counted."""
+
+PROFILE_RUNS = 20
+"""Photos checked while the profiler records, to average out variation."""
 
 DEVICE = 0
+"""Graphics card to use (0 is the first one)."""
 
 
 # --------------------------------------------------
@@ -226,6 +261,77 @@ def time_inference(model, images, imgsz):
     }
 
 
+def profile_inference(model, image, imgsz, name):
+    """
+    Profile where the processor's time goes when checking one photo.
+
+    Uses the PyTorch profiler to record every operation PyTorch runs
+    (convolutions, additions, reshapes and so on) while checking the same
+    photo ``PROFILE_RUNS`` times. Each operation has a fixed cost to
+    prepare and send to the graphics card, however little arithmetic it
+    does. Counting operations therefore shows how much of the time is
+    this fixed overhead rather than arithmetic.
+
+    Only processor-side (CPU) activity is recorded. The profiler cannot
+    record work on the graphics card itself for AMD cards on Windows.
+    The profiler also slows the code down, so its times are useful for
+    comparing operations, not as absolute speeds.
+
+    Args:
+        model (YOLO): Trained model.
+        image (PIL.Image.Image): Photo to check.
+        imgsz (int): Input resolution in pixels.
+        name (str): Experiment name, used for the output file name.
+
+    Returns:
+        dict: PyTorch operations per photo (``operations_per_image``,
+        including operations called inside other operations), convolution
+        layers run per photo (``convolutions_per_image``), and processor
+        time per photo while profiled (``profiled_cpu_ms``).
+
+    Example:
+        For YOLO11n at 640 px, the saved breakdown in
+        ``results/profiles/yolo11n_640.txt`` starts with the operations
+        that took the most processor time:
+
+        ```text
+        Name                       Self CPU %   ...   # of Calls
+        aten::miopen_convolution       52.35%   ...         1620
+        aten::nonzero                   7.17%   ...           60
+        ...
+        ```
+    """
+    for _ in range(WARMUP_IMAGES):
+        model.predict(image, imgsz=imgsz, device=DEVICE, verbose=False)
+
+    with profile(activities=[ProfilerActivity.CPU]) as prof:
+        for _ in range(PROFILE_RUNS):
+            model.predict(image, imgsz=imgsz, device=DEVICE, verbose=False)
+
+    events = prof.key_averages()
+
+    # "aten::" operations are PyTorch's own building blocks
+    operations = sum(e.count for e in events if e.key.startswith("aten::"))
+    convolutions = sum(e.count for e in events if e.key == "aten::conv2d")
+    cpu_ms = sum(e.self_cpu_time_total for e in events) / 1000
+
+    summary = {
+        "operations_per_image": round(operations / PROFILE_RUNS),
+        "convolutions_per_image": round(convolutions / PROFILE_RUNS),
+        "profiled_cpu_ms": round(cpu_ms / PROFILE_RUNS, 1),
+    }
+
+    PROFILES_DIR.mkdir(parents=True, exist_ok=True)
+    with open(PROFILES_DIR / f"{name}.txt", "w", encoding="utf-8") as f:
+        f.write(f"PyTorch profile: {name}, {PROFILE_RUNS} photos at {imgsz} px\n")
+        for key, value in summary.items():
+            f.write(f"{key}: {value}\n")
+        f.write("\n")
+        f.write(events.table(sort_by="self_cpu_time_total", row_limit=15))
+
+    return summary
+
+
 def training_hours(run_name):
     """
     Read the total training time from an Ultralytics results.csv.
@@ -284,10 +390,19 @@ def evaluate_experiment(name, label, imgsz, run_name, images):
         raise FileNotFoundError(f"No trained weights at {weights}.")
 
     print(f"\n=== {name} ===")
+
+    # Free memory left over from the previous model, then record what is
+    # still in use, so it is not counted as this model's memory
+    gc.collect()
+    torch.cuda.empty_cache()
+    baseline_mb = torch.cuda.memory_allocated() / 1e6
+    print(f"GPU memory in use before loading: {baseline_mb:.0f} MB")
+
     model = YOLO(str(weights))
 
     metrics = validate(model, imgsz, "val", f"{name}_val")
     timing = time_inference(model, images, imgsz)
+    profiling = profile_inference(model, images[0], imgsz, name)
 
     # Count the fused model (BatchNorm folded into the convolutions),
     # which is the version that actually runs during inference
@@ -312,7 +427,9 @@ def evaluate_experiment(name, label, imgsz, run_name, images):
         "inference_ms": round(timing["inference_ms"], 2),
         "end_to_end_ms": round(timing["end_to_end_ms"], 2),
         "achieved_gflops_per_s": round(achieved_gflops_per_s),
-        "peak_memory_mb": round(timing["peak_memory_mb"]),
+        "peak_memory_mb": round(timing["peak_memory_mb"] - baseline_mb),
+        "operations_per_image": profiling["operations_per_image"],
+        "convolutions_per_image": profiling["convolutions_per_image"],
         "training_hours": round(hours, 3) if hours is not None else "",
     }
 
@@ -394,6 +511,14 @@ def main():
         Image.open(path).convert("RGB")
         for path in list_images(DATASET_DIR / "valid" / "images")
     ]
+
+    # The first model run on the GPU also sets up memory that stays in use
+    # afterwards. Run one model briefly first, so this one-off memory is not
+    # counted against whichever model happens to be measured first.
+    _, _, imgsz, run_name = EXPERIMENTS[0]
+    warmup_model = YOLO(str(TRAINING_DIR / run_name / "weights" / "best.pt"))
+    warmup_model.predict(images[0], imgsz=imgsz, device=DEVICE, verbose=False)
+    del warmup_model
 
     rows = {}
     for name, label, imgsz, run_name in EXPERIMENTS:
