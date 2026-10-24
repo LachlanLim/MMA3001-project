@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Report</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5f6b7a;
+    --border: #e2e6ec; --code-bg: #f1f3f6;
+    --pass: #1a7f4b; --pass-bg: #e3f5eb;
+    --fail: #c0392b; --fail-bg: #fbe6e3;
+    --skip: #a46a00; --skip-bg: #fdf1d8;
+    --accent: #2f5bd3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --card: #1b2029; --text: #e6e9ef; --muted: #9aa4b2;
+      --border: #2b323e; --code-bg: #232a35;
+      --pass: #4fd18b; --pass-bg: #163626;
+      --fail: #ff7a6b; --fail-bg: #3d1d1a;
+      --skip: #f0b84a; --skip-bg: #3a2d12;
+      --accent: #7c9cff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 40px 16px 64px; }
+  header h1 { margin: 0 0 4px; font-size: 28px; }
+  header .sub { color: var(--muted); margin: 0; }
+  .verdict {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
+    padding: 6px 14px; border-radius: 999px; font-weight: 600;
+  }
+  .verdict.ok { background: var(--pass-bg); color: var(--pass); }
+  .verdict.bad { background: var(--fail-bg); color: var(--fail); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin: 28px 0 12px;
+  }
+  .tile {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { color: var(--muted); font-size: 13px; }
+  .tile .value { font-size: 26px; font-weight: 700; }
+  .tile.pass .value { color: var(--pass); }
+  .tile.fail .value { color: var(--fail); }
+  .tile.skip .value { color: var(--skip); }
+
+  .bar {
+    height: 8px; border-radius: 4px; background: var(--fail-bg);
+    overflow: hidden; margin-bottom: 8px;
+  }
+  .bar > div { height: 100%; background: var(--pass); }
+  .env { color: var(--muted); font-size: 13px; margin: 0 0 36px; }
+
+  .suite { margin-bottom: 40px; }
+  .suite-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 2px solid var(--border); padding-bottom: 6px;
+  }
+  .suite-head h2 { margin: 0; font-size: 20px; }
+  .suite-score { color: var(--muted); font-weight: 600; }
+  .blurb { color: var(--muted); margin: 8px 0 16px; }
+
+  .test {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--pass); border-radius: 8px;
+    padding: 14px 18px; margin-bottom: 10px;
+  }
+  .test.failed, .test.error { border-left-color: var(--fail); }
+  .test.skipped { border-left-color: var(--skip); }
+  .test-head { display: flex; justify-content: space-between; gap: 16px; }
+  .test h3 { margin: 0; font-size: 16px; }
+  .count {
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    margin-left: 6px;
+  }
+  .desc { margin: 2px 0 6px; }
+  code {
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 13px;
+    background: var(--code-bg); padding: 1px 6px; border-radius: 4px;
+  }
+  .fn { color: var(--muted); font-size: 12px; }
+  .test-meta {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 4px; flex-shrink: 0;
+  }
+  .time { color: var(--muted); font-size: 13px; }
+
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 2px 10px;
+    border-radius: 999px; white-space: nowrap;
+  }
+  .badge.passed { background: var(--pass-bg); color: var(--pass); }
+  .badge.failed, .badge.error { background: var(--fail-bg); color: var(--fail); }
+  .badge.skipped { background: var(--skip-bg); color: var(--skip); }
+
+  .params {
+    width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px;
+  }
+  .params th {
+    text-align: left; color: var(--muted); font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .04em;
+    border-bottom: 1px solid var(--border); padding: 6px 8px;
+  }
+  .params td { border-bottom: 1px solid var(--border); padding: 7px 8px; }
+  .params tr:last-child td { border-bottom: none; }
+  .params td:last-child, .params th:last-child { text-align: right; }
+
+  .failure {
+    background: var(--fail-bg); color: var(--fail); padding: 10px 12px;
+    border-radius: 6px; white-space: pre-wrap; font-size: 13px;
+    margin: 12px 0 0;
+  }
+  footer { color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (max-width: 600px) {
+    .test-head { flex-direction: column; }
+    .test-meta { flex-direction: row; align-items: center; }
+    .params th:nth-child(2), .params td:nth-child(2) { display: none; }
+  }
+  @media print {
+    body { background: #fff; }
+    .test { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Automated Test Report</h1>
+    <p class="sub">Pork packaging defect detection &middot; dataset and annotation checks</p>
+    <div class="verdict ok">All tests passed</div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">Total tests</div><div class="value">17</div></div>
+    <div class="tile pass"><div class="label">Passed</div><div class="value">17</div></div>
+    <div class="tile fail"><div class="label">Failed</div><div class="value">0</div></div>
+    <div class="tile skip"><div class="label">Skipped</div><div class="value">0</div></div>
+    <div class="tile"><div class="label">Duration</div><div class="value">442 ms</div></div>
+  </div>
+
+  <div class="bar"><div style="width: 100.0%"></div></div>
+  <p class="env">
+    100% pass rate &middot; Run 24 October 2026, 11:54 PM
+    &middot; Python 3.12.10 on Windows 11
+  </p>
+
+  
+  <section class="suite">
+    <div class="suite-head">
+      <h2>Annotation validation</h2>
+      <span class="suite-score">12 / 12 passed</span>
+    </div>
+    <p class="blurb">Checks the YOLO label validator against known good and bad annotations, then runs it over every label file in the dataset.</p>
+    
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Valid annotation </h3>
+          <p class="desc">Accept correctly formatted bounding-box annotations.</p>
+          <code class="fn">test_valid_annotation</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">&lt;1 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Invalid annotations <span class="count">10 cases</span></h3>
+          <p class="desc">Reject malformed annotations and invalid bounding boxes.</p>
+          <code class="fn">test_invalid_annotations</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">&lt;1 ms</span>
+        </div>
+      </div>
+      <table class="params"><thead><tr><th>Input annotation</th><th>Rejected because</th><th>Result</th></tr></thead><tbody><tr><td><code>(empty line)</code></td><td>An annotation must have exactly 5 values.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 0.5 0.5 0.4</code></td><td>An annotation must have exactly 5 values.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 0.5 0.5 0.4 0.2 0.1</code></td><td>An annotation must have exactly 5 values.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>unknown 0.5 0.5 0.4 0.2</code></td><td>Annotation contains invalid numeric values.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>5 0.5 0.5 0.4 0.2</code></td><td>Class ID must be between 0 and 4.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>-1 0.5 0.5 0.4 0.2</code></td><td>Class ID must be between 0 and 4.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 1.2 0.5 0.4 0.2</code></td><td>Bounding-box values must be between 0 and 1.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 0.5 0.5 0 0.2</code></td><td>Bounding-box dimensions must be positive.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 0.9 0.5 0.4 0.2</code></td><td>Bounding box exceeds horizontal image boundaries.</td><td><span class="badge passed">Passed</span></td></tr><tr><td><code>3 0.5 0.05 0.4 0.2</code></td><td>Bounding box exceeds vertical image boundaries.</td><td><span class="badge passed">Passed</span></td></tr></tbody></table>
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Real dataset annotations </h3>
+          <p class="desc">Check that all available dataset annotation files are valid.</p>
+          <code class="fn">test_real_dataset_annotations</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">395 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+  </section>
+  <section class="suite">
+    <div class="suite-head">
+      <h2>Dataset configuration</h2>
+      <span class="suite-score">5 / 5 passed</span>
+    </div>
+    <p class="blurb">Checks that data.yaml, the class list and the train/valid/test folders are set up correctly.</p>
+    
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Dataset configuration exists </h3>
+          <p class="desc">Check that the required dataset configuration is available.</p>
+          <code class="fn">test_dataset_configuration_exists</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">&lt;1 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Dataset has five classes </h3>
+          <p class="desc">Check that the dataset declares five defect categories.</p>
+          <code class="fn">test_dataset_has_five_classes</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">1 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Class names </h3>
+          <p class="desc">Check that the class names and their order are correct.</p>
+          <code class="fn">test_class_names</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">1 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Dataset split directories </h3>
+          <p class="desc">Check that image and label folders exist for every split.</p>
+          <code class="fn">test_dataset_split_directories</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">1 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <div class="test passed">
+      <div class="test-head">
+        <div>
+          <h3>Dataset has images </h3>
+          <p class="desc">Check that each dataset split contains image files.</p>
+          <code class="fn">test_dataset_has_images</code>
+        </div>
+        <div class="test-meta">
+          <span class="badge passed">Passed</span>
+          <span class="time">10 ms</span>
+        </div>
+      </div>
+      
+      
+    </div>
+  </section>
+
+  <footer>Generated from results/test_reports/all_tests.xml by src/make_test_report.py</footer>
+</main>
+</body>
+</html>
