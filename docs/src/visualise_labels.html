@@ -166,121 +166,125 @@ each box sits on a real defect of the named type.</p>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 </span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>
 </span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="c1"># Dataset location</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="n">DATASET_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data/Pork-Rasher-Error(Packaging)-4"</span><span class="p">)</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="n">DATASET_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data/Pork-Rasher-Error(Packaging)-4"</span><span class="p">)</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">"""Folder holding the downloaded dataset."""</span>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
 </span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="n">IMAGE_DIR</span> <span class="o">=</span> <span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"train"</span> <span class="o">/</span> <span class="s2">"images"</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="n">LABEL_DIR</span> <span class="o">=</span> <span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"train"</span> <span class="o">/</span> <span class="s2">"labels"</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">"""Folder of training photos to sample from."""</span>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="c1"># Where labelled examples will be saved</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"results/label_checks"</span><span class="p">)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="n">LABEL_DIR</span> <span class="o">=</span> <span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"train"</span> <span class="o">/</span> <span class="s2">"labels"</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">"""Folder of label files matching the training photos."""</span>
 </span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="n">IMAGE_EXTENSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">".jpg"</span><span class="p">,</span> <span class="s2">".jpeg"</span><span class="p">,</span> <span class="s2">".png"</span><span class="p">}</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"results/label_checks"</span><span class="p">)</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">"""Where the photos with boxes drawn on are saved."""</span>
 </span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="k">def</span><span class="w"> </span><span class="nf">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    Draw the YOLO bounding boxes from one label file onto its image.</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="n">IMAGE_EXTENSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">".jpg"</span><span class="p">,</span> <span class="s2">".jpeg"</span><span class="p">,</span> <span class="s2">".png"</span><span class="p">}</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="sd">"""File types treated as photos (others are ignored)."""</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
 </span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    Lines that do not have exactly five values are skipped.</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">    Args:</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">        image_path (Path): Image file to annotate.</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">        label_path (Path): Matching YOLO label file. If it does not exist,</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">            the image is returned without boxes.</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">        class_names (list[str]): Class names indexed by class ID.</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    Returns:</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        PIL.Image.Image: RGB copy of the image with boxes and class names.</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    Example:</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">        ```python</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">        image = draw_labels(</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">            Path("data/.../train/images/frame_35.jpg"),</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">            Path("data/.../train/labels/frame_35.txt"),</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">            ["loose-meat", "packaging-error", "twisted-meat", "unsealed", "wrinkle"],</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">        )</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">        image.show()   # opens the photo with its defects outlined in red</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">        ```</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    """</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">)</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">label_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>        <span class="k">return</span> <span class="n">image</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="k">def</span><span class="w"> </span><span class="nf">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">    Draw the YOLO bounding boxes from one label file onto its image.</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">    Lines that do not have exactly five values are skipped.</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">    Args:</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">        image_path (Path): Image file to annotate.</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">        label_path (Path): Matching YOLO label file. If it does not exist,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">            the image is returned without boxes.</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        class_names (list[str]): Class names indexed by class ID.</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">    Returns:</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">        PIL.Image.Image: RGB copy of the image with boxes and class names.</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    Example:</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">        ```python</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">        image = draw_labels(</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">            Path("data/.../train/images/frame_35.jpg"),</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">            Path("data/.../train/labels/frame_35.txt"),</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">            ["loose-meat", "packaging-error", "twisted-meat", "unsealed", "wrinkle"],</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">        )</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        image.show()   # opens the photo with its defects outlined in red</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">        ```</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    """</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">)</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">label_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>        <span class="k">return</span> <span class="n">image</span>
 </span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>                <span class="k">continue</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>            <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>            <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">box_height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>            <span class="c1"># YOLO coordinates are normalised from 0 to 1</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>            <span class="n">x_center</span> <span class="o">*=</span> <span class="n">image_width</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>            <span class="n">y_center</span> <span class="o">*=</span> <span class="n">image_height</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>            <span class="n">box_width</span> <span class="o">*=</span> <span class="n">image_width</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>            <span class="n">box_height</span> <span class="o">*=</span> <span class="n">image_height</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>            <span class="c1"># Convert centre coordinates into box corners</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>            <span class="n">x1</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">-</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>            <span class="n">y1</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">-</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>            <span class="n">x2</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">+</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>            <span class="n">y2</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">+</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span> <span class="n">outline</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)),</span> <span class="n">class_names</span><span class="p">[</span><span class="n">class_id</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="k">return</span> <span class="n">image</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">    Save 10 randomly chosen training images with their labels drawn on.</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>                <span class="k">continue</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>            <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>            <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">box_height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>            <span class="c1"># YOLO coordinates are normalised from 0 to 1</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>            <span class="n">x_center</span> <span class="o">*=</span> <span class="n">image_width</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>            <span class="n">y_center</span> <span class="o">*=</span> <span class="n">image_height</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>            <span class="n">box_width</span> <span class="o">*=</span> <span class="n">image_width</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>            <span class="n">box_height</span> <span class="o">*=</span> <span class="n">image_height</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>            <span class="c1"># Convert centre coordinates into box corners</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>            <span class="n">x1</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">-</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>            <span class="n">y1</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">-</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>            <span class="n">x2</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">+</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>            <span class="n">y2</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">+</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span> <span class="n">outline</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)),</span> <span class="n">class_names</span><span class="p">[</span><span class="n">class_id</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="k">return</span> <span class="n">image</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
 </span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">    The random seed is fixed at 42 so the same images are chosen each run.</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">    Annotated images are saved to ``results/label_checks``.</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">    Raises:</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">        FileNotFoundError: If the dataset has not been downloaded.</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    """</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="c1"># Read the class names from data.yaml</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"data.yaml"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">"names"</span><span class="p">]</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    Save 10 randomly chosen training images with their labels drawn on.</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">    The random seed is fixed at 42 so the same images are chosen each run.</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    Annotated images are saved to ``results/label_checks``.</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">    Raises:</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">        FileNotFoundError: If the dataset has not been downloaded.</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">    """</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>    <span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Classes:"</span><span class="p">)</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_names</span><span class="p">):</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="c1"># Read the class names from data.yaml</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"data.yaml"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">"names"</span><span class="p">]</span>
 </span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="c1"># Sort so the seeded sample does not depend on file-system order</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">images</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="n">image_path</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>        <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">IMAGE_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="k">if</span> <span class="n">image_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">IMAGE_EXTENSIONS</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="p">)</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    <span class="n">sample_images</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)))</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">sample_images</span><span class="p">:</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="n">label_path</span> <span class="o">=</span> <span class="n">LABEL_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">image_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.txt"</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="n">image</span> <span class="o">=</span> <span class="n">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">)</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Classes:"</span><span class="p">)</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_names</span><span class="p">):</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>    <span class="c1"># Sort so the seeded sample does not depend on file-system order</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="n">images</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="n">image_path</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">IMAGE_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="k">if</span> <span class="n">image_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">IMAGE_EXTENSIONS</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="p">)</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="n">sample_images</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)))</span>
 </span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="n">image_path</span><span class="o">.</span><span class="n">name</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>    <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">sample_images</span><span class="p">:</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>        <span class="n">label_path</span> <span class="o">=</span> <span class="n">LABEL_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">image_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.txt"</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>        <span class="n">image</span> <span class="o">=</span> <span class="n">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">)</span>
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Finished visualising labels."</span><span class="p">)</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="n">main</span><span class="p">()</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="n">image_path</span><span class="o">.</span><span class="n">name</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Finished visualising labels."</span><span class="p">)</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -294,7 +298,9 @@ each box sits on a real defect of the named type.</p>
     </div>
     <a class="headerlink" href="#DATASET_DIR"></a>
     
-    
+            <div class="docstring"><p>Folder holding the downloaded dataset.</p>
+</div>
+
 
                 </section>
                 <section id="IMAGE_DIR">
@@ -306,7 +312,9 @@ each box sits on a real defect of the named type.</p>
     </div>
     <a class="headerlink" href="#IMAGE_DIR"></a>
     
-    
+            <div class="docstring"><p>Folder of training photos to sample from.</p>
+</div>
+
 
                 </section>
                 <section id="LABEL_DIR">
@@ -318,7 +326,9 @@ each box sits on a real defect of the named type.</p>
     </div>
     <a class="headerlink" href="#LABEL_DIR"></a>
     
-    
+            <div class="docstring"><p>Folder of label files matching the training photos.</p>
+</div>
+
 
                 </section>
                 <section id="OUTPUT_DIR">
@@ -330,19 +340,23 @@ each box sits on a real defect of the named type.</p>
     </div>
     <a class="headerlink" href="#OUTPUT_DIR"></a>
     
-    
+            <div class="docstring"><p>Where the photos with boxes drawn on are saved.</p>
+</div>
+
 
                 </section>
                 <section id="IMAGE_EXTENSIONS">
                     <div class="attr variable">
             <span class="name">IMAGE_EXTENSIONS</span>        =
-<span class="default_value">{&#39;.jpg&#39;, &#39;.jpeg&#39;, &#39;.png&#39;}</span>
+<span class="default_value">{&#39;.png&#39;, &#39;.jpg&#39;, &#39;.jpeg&#39;}</span>
 
         
     </div>
     <a class="headerlink" href="#IMAGE_EXTENSIONS"></a>
     
-    
+            <div class="docstring"><p>File types treated as photos (others are ignored).</p>
+</div>
+
 
                 </section>
                 <section id="draw_labels">
@@ -356,64 +370,64 @@ each box sits on a real defect of the named type.</p>
 
     </div>
     <a class="headerlink" href="#draw_labels"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="draw_labels-54"><a href="#draw_labels-54"><span class="linenos"> 54</span></a><span class="k">def</span><span class="w"> </span><span class="nf">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
-</span><span id="draw_labels-55"><a href="#draw_labels-55"><span class="linenos"> 55</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="draw_labels-56"><a href="#draw_labels-56"><span class="linenos"> 56</span></a><span class="sd">    Draw the YOLO bounding boxes from one label file onto its image.</span>
-</span><span id="draw_labels-57"><a href="#draw_labels-57"><span class="linenos"> 57</span></a>
-</span><span id="draw_labels-58"><a href="#draw_labels-58"><span class="linenos"> 58</span></a><span class="sd">    Lines that do not have exactly five values are skipped.</span>
-</span><span id="draw_labels-59"><a href="#draw_labels-59"><span class="linenos"> 59</span></a>
-</span><span id="draw_labels-60"><a href="#draw_labels-60"><span class="linenos"> 60</span></a><span class="sd">    Args:</span>
-</span><span id="draw_labels-61"><a href="#draw_labels-61"><span class="linenos"> 61</span></a><span class="sd">        image_path (Path): Image file to annotate.</span>
-</span><span id="draw_labels-62"><a href="#draw_labels-62"><span class="linenos"> 62</span></a><span class="sd">        label_path (Path): Matching YOLO label file. If it does not exist,</span>
-</span><span id="draw_labels-63"><a href="#draw_labels-63"><span class="linenos"> 63</span></a><span class="sd">            the image is returned without boxes.</span>
-</span><span id="draw_labels-64"><a href="#draw_labels-64"><span class="linenos"> 64</span></a><span class="sd">        class_names (list[str]): Class names indexed by class ID.</span>
-</span><span id="draw_labels-65"><a href="#draw_labels-65"><span class="linenos"> 65</span></a>
-</span><span id="draw_labels-66"><a href="#draw_labels-66"><span class="linenos"> 66</span></a><span class="sd">    Returns:</span>
-</span><span id="draw_labels-67"><a href="#draw_labels-67"><span class="linenos"> 67</span></a><span class="sd">        PIL.Image.Image: RGB copy of the image with boxes and class names.</span>
-</span><span id="draw_labels-68"><a href="#draw_labels-68"><span class="linenos"> 68</span></a>
-</span><span id="draw_labels-69"><a href="#draw_labels-69"><span class="linenos"> 69</span></a><span class="sd">    Example:</span>
-</span><span id="draw_labels-70"><a href="#draw_labels-70"><span class="linenos"> 70</span></a><span class="sd">        ```python</span>
-</span><span id="draw_labels-71"><a href="#draw_labels-71"><span class="linenos"> 71</span></a><span class="sd">        image = draw_labels(</span>
-</span><span id="draw_labels-72"><a href="#draw_labels-72"><span class="linenos"> 72</span></a><span class="sd">            Path("data/.../train/images/frame_35.jpg"),</span>
-</span><span id="draw_labels-73"><a href="#draw_labels-73"><span class="linenos"> 73</span></a><span class="sd">            Path("data/.../train/labels/frame_35.txt"),</span>
-</span><span id="draw_labels-74"><a href="#draw_labels-74"><span class="linenos"> 74</span></a><span class="sd">            ["loose-meat", "packaging-error", "twisted-meat", "unsealed", "wrinkle"],</span>
-</span><span id="draw_labels-75"><a href="#draw_labels-75"><span class="linenos"> 75</span></a><span class="sd">        )</span>
-</span><span id="draw_labels-76"><a href="#draw_labels-76"><span class="linenos"> 76</span></a><span class="sd">        image.show()   # opens the photo with its defects outlined in red</span>
-</span><span id="draw_labels-77"><a href="#draw_labels-77"><span class="linenos"> 77</span></a><span class="sd">        ```</span>
-</span><span id="draw_labels-78"><a href="#draw_labels-78"><span class="linenos"> 78</span></a><span class="sd">    """</span>
-</span><span id="draw_labels-79"><a href="#draw_labels-79"><span class="linenos"> 79</span></a>    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">)</span>
-</span><span id="draw_labels-80"><a href="#draw_labels-80"><span class="linenos"> 80</span></a>    <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-</span><span id="draw_labels-81"><a href="#draw_labels-81"><span class="linenos"> 81</span></a>    <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span>
-</span><span id="draw_labels-82"><a href="#draw_labels-82"><span class="linenos"> 82</span></a>
-</span><span id="draw_labels-83"><a href="#draw_labels-83"><span class="linenos"> 83</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">label_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span id="draw_labels-84"><a href="#draw_labels-84"><span class="linenos"> 84</span></a>        <span class="k">return</span> <span class="n">image</span>
-</span><span id="draw_labels-85"><a href="#draw_labels-85"><span class="linenos"> 85</span></a>
-</span><span id="draw_labels-86"><a href="#draw_labels-86"><span class="linenos"> 86</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="draw_labels-87"><a href="#draw_labels-87"><span class="linenos"> 87</span></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="draw_labels-88"><a href="#draw_labels-88"><span class="linenos"> 88</span></a>            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="draw_labels-58"><a href="#draw_labels-58"><span class="linenos"> 58</span></a><span class="k">def</span><span class="w"> </span><span class="nf">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+</span><span id="draw_labels-59"><a href="#draw_labels-59"><span class="linenos"> 59</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="draw_labels-60"><a href="#draw_labels-60"><span class="linenos"> 60</span></a><span class="sd">    Draw the YOLO bounding boxes from one label file onto its image.</span>
+</span><span id="draw_labels-61"><a href="#draw_labels-61"><span class="linenos"> 61</span></a>
+</span><span id="draw_labels-62"><a href="#draw_labels-62"><span class="linenos"> 62</span></a><span class="sd">    Lines that do not have exactly five values are skipped.</span>
+</span><span id="draw_labels-63"><a href="#draw_labels-63"><span class="linenos"> 63</span></a>
+</span><span id="draw_labels-64"><a href="#draw_labels-64"><span class="linenos"> 64</span></a><span class="sd">    Args:</span>
+</span><span id="draw_labels-65"><a href="#draw_labels-65"><span class="linenos"> 65</span></a><span class="sd">        image_path (Path): Image file to annotate.</span>
+</span><span id="draw_labels-66"><a href="#draw_labels-66"><span class="linenos"> 66</span></a><span class="sd">        label_path (Path): Matching YOLO label file. If it does not exist,</span>
+</span><span id="draw_labels-67"><a href="#draw_labels-67"><span class="linenos"> 67</span></a><span class="sd">            the image is returned without boxes.</span>
+</span><span id="draw_labels-68"><a href="#draw_labels-68"><span class="linenos"> 68</span></a><span class="sd">        class_names (list[str]): Class names indexed by class ID.</span>
+</span><span id="draw_labels-69"><a href="#draw_labels-69"><span class="linenos"> 69</span></a>
+</span><span id="draw_labels-70"><a href="#draw_labels-70"><span class="linenos"> 70</span></a><span class="sd">    Returns:</span>
+</span><span id="draw_labels-71"><a href="#draw_labels-71"><span class="linenos"> 71</span></a><span class="sd">        PIL.Image.Image: RGB copy of the image with boxes and class names.</span>
+</span><span id="draw_labels-72"><a href="#draw_labels-72"><span class="linenos"> 72</span></a>
+</span><span id="draw_labels-73"><a href="#draw_labels-73"><span class="linenos"> 73</span></a><span class="sd">    Example:</span>
+</span><span id="draw_labels-74"><a href="#draw_labels-74"><span class="linenos"> 74</span></a><span class="sd">        ```python</span>
+</span><span id="draw_labels-75"><a href="#draw_labels-75"><span class="linenos"> 75</span></a><span class="sd">        image = draw_labels(</span>
+</span><span id="draw_labels-76"><a href="#draw_labels-76"><span class="linenos"> 76</span></a><span class="sd">            Path("data/.../train/images/frame_35.jpg"),</span>
+</span><span id="draw_labels-77"><a href="#draw_labels-77"><span class="linenos"> 77</span></a><span class="sd">            Path("data/.../train/labels/frame_35.txt"),</span>
+</span><span id="draw_labels-78"><a href="#draw_labels-78"><span class="linenos"> 78</span></a><span class="sd">            ["loose-meat", "packaging-error", "twisted-meat", "unsealed", "wrinkle"],</span>
+</span><span id="draw_labels-79"><a href="#draw_labels-79"><span class="linenos"> 79</span></a><span class="sd">        )</span>
+</span><span id="draw_labels-80"><a href="#draw_labels-80"><span class="linenos"> 80</span></a><span class="sd">        image.show()   # opens the photo with its defects outlined in red</span>
+</span><span id="draw_labels-81"><a href="#draw_labels-81"><span class="linenos"> 81</span></a><span class="sd">        ```</span>
+</span><span id="draw_labels-82"><a href="#draw_labels-82"><span class="linenos"> 82</span></a><span class="sd">    """</span>
+</span><span id="draw_labels-83"><a href="#draw_labels-83"><span class="linenos"> 83</span></a>    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">)</span>
+</span><span id="draw_labels-84"><a href="#draw_labels-84"><span class="linenos"> 84</span></a>    <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</span><span id="draw_labels-85"><a href="#draw_labels-85"><span class="linenos"> 85</span></a>    <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span>
+</span><span id="draw_labels-86"><a href="#draw_labels-86"><span class="linenos"> 86</span></a>
+</span><span id="draw_labels-87"><a href="#draw_labels-87"><span class="linenos"> 87</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">label_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="draw_labels-88"><a href="#draw_labels-88"><span class="linenos"> 88</span></a>        <span class="k">return</span> <span class="n">image</span>
 </span><span id="draw_labels-89"><a href="#draw_labels-89"><span class="linenos"> 89</span></a>
-</span><span id="draw_labels-90"><a href="#draw_labels-90"><span class="linenos"> 90</span></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
-</span><span id="draw_labels-91"><a href="#draw_labels-91"><span class="linenos"> 91</span></a>                <span class="k">continue</span>
-</span><span id="draw_labels-92"><a href="#draw_labels-92"><span class="linenos"> 92</span></a>
-</span><span id="draw_labels-93"><a href="#draw_labels-93"><span class="linenos"> 93</span></a>            <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span id="draw_labels-94"><a href="#draw_labels-94"><span class="linenos"> 94</span></a>            <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">box_height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-</span><span id="draw_labels-95"><a href="#draw_labels-95"><span class="linenos"> 95</span></a>
-</span><span id="draw_labels-96"><a href="#draw_labels-96"><span class="linenos"> 96</span></a>            <span class="c1"># YOLO coordinates are normalised from 0 to 1</span>
-</span><span id="draw_labels-97"><a href="#draw_labels-97"><span class="linenos"> 97</span></a>            <span class="n">x_center</span> <span class="o">*=</span> <span class="n">image_width</span>
-</span><span id="draw_labels-98"><a href="#draw_labels-98"><span class="linenos"> 98</span></a>            <span class="n">y_center</span> <span class="o">*=</span> <span class="n">image_height</span>
-</span><span id="draw_labels-99"><a href="#draw_labels-99"><span class="linenos"> 99</span></a>            <span class="n">box_width</span> <span class="o">*=</span> <span class="n">image_width</span>
-</span><span id="draw_labels-100"><a href="#draw_labels-100"><span class="linenos">100</span></a>            <span class="n">box_height</span> <span class="o">*=</span> <span class="n">image_height</span>
-</span><span id="draw_labels-101"><a href="#draw_labels-101"><span class="linenos">101</span></a>
-</span><span id="draw_labels-102"><a href="#draw_labels-102"><span class="linenos">102</span></a>            <span class="c1"># Convert centre coordinates into box corners</span>
-</span><span id="draw_labels-103"><a href="#draw_labels-103"><span class="linenos">103</span></a>            <span class="n">x1</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">-</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="draw_labels-104"><a href="#draw_labels-104"><span class="linenos">104</span></a>            <span class="n">y1</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">-</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="draw_labels-105"><a href="#draw_labels-105"><span class="linenos">105</span></a>            <span class="n">x2</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">+</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="draw_labels-106"><a href="#draw_labels-106"><span class="linenos">106</span></a>            <span class="n">y2</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">+</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
-</span><span id="draw_labels-107"><a href="#draw_labels-107"><span class="linenos">107</span></a>
-</span><span id="draw_labels-108"><a href="#draw_labels-108"><span class="linenos">108</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span> <span class="n">outline</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</span><span id="draw_labels-109"><a href="#draw_labels-109"><span class="linenos">109</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)),</span> <span class="n">class_names</span><span class="p">[</span><span class="n">class_id</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
-</span><span id="draw_labels-110"><a href="#draw_labels-110"><span class="linenos">110</span></a>
-</span><span id="draw_labels-111"><a href="#draw_labels-111"><span class="linenos">111</span></a>    <span class="k">return</span> <span class="n">image</span>
+</span><span id="draw_labels-90"><a href="#draw_labels-90"><span class="linenos"> 90</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="draw_labels-91"><a href="#draw_labels-91"><span class="linenos"> 91</span></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="draw_labels-92"><a href="#draw_labels-92"><span class="linenos"> 92</span></a>            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</span><span id="draw_labels-93"><a href="#draw_labels-93"><span class="linenos"> 93</span></a>
+</span><span id="draw_labels-94"><a href="#draw_labels-94"><span class="linenos"> 94</span></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+</span><span id="draw_labels-95"><a href="#draw_labels-95"><span class="linenos"> 95</span></a>                <span class="k">continue</span>
+</span><span id="draw_labels-96"><a href="#draw_labels-96"><span class="linenos"> 96</span></a>
+</span><span id="draw_labels-97"><a href="#draw_labels-97"><span class="linenos"> 97</span></a>            <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="draw_labels-98"><a href="#draw_labels-98"><span class="linenos"> 98</span></a>            <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">box_height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</span><span id="draw_labels-99"><a href="#draw_labels-99"><span class="linenos"> 99</span></a>
+</span><span id="draw_labels-100"><a href="#draw_labels-100"><span class="linenos">100</span></a>            <span class="c1"># YOLO coordinates are normalised from 0 to 1</span>
+</span><span id="draw_labels-101"><a href="#draw_labels-101"><span class="linenos">101</span></a>            <span class="n">x_center</span> <span class="o">*=</span> <span class="n">image_width</span>
+</span><span id="draw_labels-102"><a href="#draw_labels-102"><span class="linenos">102</span></a>            <span class="n">y_center</span> <span class="o">*=</span> <span class="n">image_height</span>
+</span><span id="draw_labels-103"><a href="#draw_labels-103"><span class="linenos">103</span></a>            <span class="n">box_width</span> <span class="o">*=</span> <span class="n">image_width</span>
+</span><span id="draw_labels-104"><a href="#draw_labels-104"><span class="linenos">104</span></a>            <span class="n">box_height</span> <span class="o">*=</span> <span class="n">image_height</span>
+</span><span id="draw_labels-105"><a href="#draw_labels-105"><span class="linenos">105</span></a>
+</span><span id="draw_labels-106"><a href="#draw_labels-106"><span class="linenos">106</span></a>            <span class="c1"># Convert centre coordinates into box corners</span>
+</span><span id="draw_labels-107"><a href="#draw_labels-107"><span class="linenos">107</span></a>            <span class="n">x1</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">-</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="draw_labels-108"><a href="#draw_labels-108"><span class="linenos">108</span></a>            <span class="n">y1</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">-</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="draw_labels-109"><a href="#draw_labels-109"><span class="linenos">109</span></a>            <span class="n">x2</span> <span class="o">=</span> <span class="n">x_center</span> <span class="o">+</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="draw_labels-110"><a href="#draw_labels-110"><span class="linenos">110</span></a>            <span class="n">y2</span> <span class="o">=</span> <span class="n">y_center</span> <span class="o">+</span> <span class="n">box_height</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span id="draw_labels-111"><a href="#draw_labels-111"><span class="linenos">111</span></a>
+</span><span id="draw_labels-112"><a href="#draw_labels-112"><span class="linenos">112</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span> <span class="n">outline</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="draw_labels-113"><a href="#draw_labels-113"><span class="linenos">113</span></a>            <span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)),</span> <span class="n">class_names</span><span class="p">[</span><span class="n">class_id</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
+</span><span id="draw_labels-114"><a href="#draw_labels-114"><span class="linenos">114</span></a>
+</span><span id="draw_labels-115"><a href="#draw_labels-115"><span class="linenos">115</span></a>    <span class="k">return</span> <span class="n">image</span>
 </span></pre></div>
 
 
@@ -464,45 +478,45 @@ the image is returned without boxes.</li>
 
     </div>
     <a class="headerlink" href="#main"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="main-114"><a href="#main-114"><span class="linenos">114</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="main-115"><a href="#main-115"><span class="linenos">115</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="main-116"><a href="#main-116"><span class="linenos">116</span></a><span class="sd">    Save 10 randomly chosen training images with their labels drawn on.</span>
-</span><span id="main-117"><a href="#main-117"><span class="linenos">117</span></a>
-</span><span id="main-118"><a href="#main-118"><span class="linenos">118</span></a><span class="sd">    The random seed is fixed at 42 so the same images are chosen each run.</span>
-</span><span id="main-119"><a href="#main-119"><span class="linenos">119</span></a><span class="sd">    Annotated images are saved to ``results/label_checks``.</span>
-</span><span id="main-120"><a href="#main-120"><span class="linenos">120</span></a>
-</span><span id="main-121"><a href="#main-121"><span class="linenos">121</span></a><span class="sd">    Raises:</span>
-</span><span id="main-122"><a href="#main-122"><span class="linenos">122</span></a><span class="sd">        FileNotFoundError: If the dataset has not been downloaded.</span>
-</span><span id="main-123"><a href="#main-123"><span class="linenos">123</span></a><span class="sd">    """</span>
-</span><span id="main-124"><a href="#main-124"><span class="linenos">124</span></a>    <span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="main-125"><a href="#main-125"><span class="linenos">125</span></a>
-</span><span id="main-126"><a href="#main-126"><span class="linenos">126</span></a>    <span class="c1"># Read the class names from data.yaml</span>
-</span><span id="main-127"><a href="#main-127"><span class="linenos">127</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"data.yaml"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="main-128"><a href="#main-128"><span class="linenos">128</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">"names"</span><span class="p">]</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="main-118"><a href="#main-118"><span class="linenos">118</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="main-119"><a href="#main-119"><span class="linenos">119</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="main-120"><a href="#main-120"><span class="linenos">120</span></a><span class="sd">    Save 10 randomly chosen training images with their labels drawn on.</span>
+</span><span id="main-121"><a href="#main-121"><span class="linenos">121</span></a>
+</span><span id="main-122"><a href="#main-122"><span class="linenos">122</span></a><span class="sd">    The random seed is fixed at 42 so the same images are chosen each run.</span>
+</span><span id="main-123"><a href="#main-123"><span class="linenos">123</span></a><span class="sd">    Annotated images are saved to ``results/label_checks``.</span>
+</span><span id="main-124"><a href="#main-124"><span class="linenos">124</span></a>
+</span><span id="main-125"><a href="#main-125"><span class="linenos">125</span></a><span class="sd">    Raises:</span>
+</span><span id="main-126"><a href="#main-126"><span class="linenos">126</span></a><span class="sd">        FileNotFoundError: If the dataset has not been downloaded.</span>
+</span><span id="main-127"><a href="#main-127"><span class="linenos">127</span></a><span class="sd">    """</span>
+</span><span id="main-128"><a href="#main-128"><span class="linenos">128</span></a>    <span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="main-129"><a href="#main-129"><span class="linenos">129</span></a>
-</span><span id="main-130"><a href="#main-130"><span class="linenos">130</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Classes:"</span><span class="p">)</span>
-</span><span id="main-131"><a href="#main-131"><span class="linenos">131</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_names</span><span class="p">):</span>
-</span><span id="main-132"><a href="#main-132"><span class="linenos">132</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="main-130"><a href="#main-130"><span class="linenos">130</span></a>    <span class="c1"># Read the class names from data.yaml</span>
+</span><span id="main-131"><a href="#main-131"><span class="linenos">131</span></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATASET_DIR</span> <span class="o">/</span> <span class="s2">"data.yaml"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="main-132"><a href="#main-132"><span class="linenos">132</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">"names"</span><span class="p">]</span>
 </span><span id="main-133"><a href="#main-133"><span class="linenos">133</span></a>
-</span><span id="main-134"><a href="#main-134"><span class="linenos">134</span></a>    <span class="c1"># Sort so the seeded sample does not depend on file-system order</span>
-</span><span id="main-135"><a href="#main-135"><span class="linenos">135</span></a>    <span class="n">images</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-</span><span id="main-136"><a href="#main-136"><span class="linenos">136</span></a>        <span class="n">image_path</span>
-</span><span id="main-137"><a href="#main-137"><span class="linenos">137</span></a>        <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">IMAGE_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
-</span><span id="main-138"><a href="#main-138"><span class="linenos">138</span></a>        <span class="k">if</span> <span class="n">image_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">IMAGE_EXTENSIONS</span>
-</span><span id="main-139"><a href="#main-139"><span class="linenos">139</span></a>    <span class="p">)</span>
-</span><span id="main-140"><a href="#main-140"><span class="linenos">140</span></a>
-</span><span id="main-141"><a href="#main-141"><span class="linenos">141</span></a>    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="main-142"><a href="#main-142"><span class="linenos">142</span></a>    <span class="n">sample_images</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)))</span>
-</span><span id="main-143"><a href="#main-143"><span class="linenos">143</span></a>
-</span><span id="main-144"><a href="#main-144"><span class="linenos">144</span></a>    <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">sample_images</span><span class="p">:</span>
-</span><span id="main-145"><a href="#main-145"><span class="linenos">145</span></a>        <span class="n">label_path</span> <span class="o">=</span> <span class="n">LABEL_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">image_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.txt"</span>
-</span><span id="main-146"><a href="#main-146"><span class="linenos">146</span></a>        <span class="n">image</span> <span class="o">=</span> <span class="n">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">)</span>
+</span><span id="main-134"><a href="#main-134"><span class="linenos">134</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Classes:"</span><span class="p">)</span>
+</span><span id="main-135"><a href="#main-135"><span class="linenos">135</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_names</span><span class="p">):</span>
+</span><span id="main-136"><a href="#main-136"><span class="linenos">136</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="main-137"><a href="#main-137"><span class="linenos">137</span></a>
+</span><span id="main-138"><a href="#main-138"><span class="linenos">138</span></a>    <span class="c1"># Sort so the seeded sample does not depend on file-system order</span>
+</span><span id="main-139"><a href="#main-139"><span class="linenos">139</span></a>    <span class="n">images</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+</span><span id="main-140"><a href="#main-140"><span class="linenos">140</span></a>        <span class="n">image_path</span>
+</span><span id="main-141"><a href="#main-141"><span class="linenos">141</span></a>        <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">IMAGE_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
+</span><span id="main-142"><a href="#main-142"><span class="linenos">142</span></a>        <span class="k">if</span> <span class="n">image_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">IMAGE_EXTENSIONS</span>
+</span><span id="main-143"><a href="#main-143"><span class="linenos">143</span></a>    <span class="p">)</span>
+</span><span id="main-144"><a href="#main-144"><span class="linenos">144</span></a>
+</span><span id="main-145"><a href="#main-145"><span class="linenos">145</span></a>    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="main-146"><a href="#main-146"><span class="linenos">146</span></a>    <span class="n">sample_images</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)))</span>
 </span><span id="main-147"><a href="#main-147"><span class="linenos">147</span></a>
-</span><span id="main-148"><a href="#main-148"><span class="linenos">148</span></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="n">image_path</span><span class="o">.</span><span class="n">name</span>
-</span><span id="main-149"><a href="#main-149"><span class="linenos">149</span></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
-</span><span id="main-150"><a href="#main-150"><span class="linenos">150</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="main-148"><a href="#main-148"><span class="linenos">148</span></a>    <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="n">sample_images</span><span class="p">:</span>
+</span><span id="main-149"><a href="#main-149"><span class="linenos">149</span></a>        <span class="n">label_path</span> <span class="o">=</span> <span class="n">LABEL_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">image_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.txt"</span>
+</span><span id="main-150"><a href="#main-150"><span class="linenos">150</span></a>        <span class="n">image</span> <span class="o">=</span> <span class="n">draw_labels</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">label_path</span><span class="p">,</span> <span class="n">class_names</span><span class="p">)</span>
 </span><span id="main-151"><a href="#main-151"><span class="linenos">151</span></a>
-</span><span id="main-152"><a href="#main-152"><span class="linenos">152</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Finished visualising labels."</span><span class="p">)</span>
+</span><span id="main-152"><a href="#main-152"><span class="linenos">152</span></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="n">image_path</span><span class="o">.</span><span class="n">name</span>
+</span><span id="main-153"><a href="#main-153"><span class="linenos">153</span></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+</span><span id="main-154"><a href="#main-154"><span class="linenos">154</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="main-155"><a href="#main-155"><span class="linenos">155</span></a>
+</span><span id="main-156"><a href="#main-156"><span class="linenos">156</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Finished visualising labels."</span><span class="p">)</span>
 </span></pre></div>
 
 

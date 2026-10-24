@@ -38,9 +38,10 @@ from pathlib import Path
 
 
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
+"""Folder holding the downloaded dataset."""
 
-# The dataset declares five defect classes (IDs 0 to 4).
 NUM_CLASSES = 5
+"""Number of defect types. Valid class IDs are 0 to 4."""
 
 
 def validate_annotation(line):

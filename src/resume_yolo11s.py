@@ -32,6 +32,7 @@ from ultralytics import YOLO
 CHECKPOINT = Path(
     "runs/detect/results/training/yolo11s_baseline/weights/last.pt"
 )
+"""The checkpoint saved after the last completed epoch, which training resumes from."""
 
 
 def main():

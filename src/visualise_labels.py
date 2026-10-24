@@ -38,16 +38,20 @@ from PIL import Image, ImageDraw
 import yaml
 
 
-# Dataset location
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
+"""Folder holding the downloaded dataset."""
 
 IMAGE_DIR = DATASET_DIR / "train" / "images"
-LABEL_DIR = DATASET_DIR / "train" / "labels"
+"""Folder of training photos to sample from."""
 
-# Where labelled examples will be saved
+LABEL_DIR = DATASET_DIR / "train" / "labels"
+"""Folder of label files matching the training photos."""
+
 OUTPUT_DIR = Path("results/label_checks")
+"""Where the photos with boxes drawn on are saved."""
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+"""File types treated as photos (others are ignored)."""
 
 
 def draw_labels(image_path, label_path, class_names):

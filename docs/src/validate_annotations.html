@@ -160,134 +160,135 @@ The same checks also run automatically in the test suite
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>
 </span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>
 </span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="n">DATASET_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data/Pork-Rasher-Error(Packaging)-4"</span><span class="p">)</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="c1"># The dataset declares five defect classes (IDs 0 to 4).</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">"""Folder holding the downloaded dataset."""</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="n">NUM_CLASSES</span> <span class="o">=</span> <span class="mi">5</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">"""Number of defect types. Valid class IDs are 0 to 4."""</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">    Validate a single YOLO annotation line.</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">    Args:</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">        line (str): One line from a YOLO label file, e.g.</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">            ``"3 0.5 0.5 0.4 0.2"``.</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="sd">    Returns:</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">        tuple: ``(class_id, x, y, width, height)`` with ``class_id`` as an</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">        int and the box values as floats in the range 0 to 1.</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    Raises:</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">        ValueError: If the line does not have exactly five values, contains</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">            non-numeric values, uses an unknown class ID, or describes a box</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">            with non-positive size or that extends outside the image.</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">    Examples:</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">        A valid unsealed-pack label (class 3) in the centre of the photo:</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.5 0.5 0.4 0.2")</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        (3, 0.5, 0.5, 0.4, 0.2)</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">        Class 7 does not exist (there are only five defect types, 0-4):</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("7 0.5 0.5 0.4 0.2")</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">        Traceback (most recent call last):</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">            ...</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">        ValueError: Class ID must be between 0 and 4.</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">        The centre (0.9) is inside the photo, but a box 0.4 wide would</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">        stretch from 0.7 to 1.1, past the right-hand edge:</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.9 0.5 0.4 0.2")</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">        Traceback (most recent call last):</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">            ...</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">        ValueError: Bounding box exceeds horizontal image boundaries.</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    """</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"An annotation must have exactly 5 values."</span><span class="p">)</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Annotation contains invalid numeric values."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">class_id</span> <span class="o">&lt;</span> <span class="n">NUM_CLASSES</span><span class="p">:</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Class ID must be between 0 and 4."</span><span class="p">)</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)):</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box values must be between 0 and 1."</span><span class="p">)</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box dimensions must be positive."</span><span class="p">)</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="c1"># The box edges, not just its centre, must stay inside the image.</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">+</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds horizontal image boundaries."</span><span class="p">)</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">+</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds vertical image boundaries."</span><span class="p">)</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="k">return</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    Validate a single YOLO annotation line.</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">    Args:</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">        line (str): One line from a YOLO label file, e.g.</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="sd">            ``"3 0.5 0.5 0.4 0.2"``.</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    Returns:</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">        tuple: ``(class_id, x, y, width, height)`` with ``class_id`` as an</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">        int and the box values as floats in the range 0 to 1.</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">    Raises:</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">        ValueError: If the line does not have exactly five values, contains</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">            non-numeric values, uses an unknown class ID, or describes a box</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">            with non-positive size or that extends outside the image.</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">    Examples:</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">        A valid unsealed-pack label (class 3) in the centre of the photo:</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.5 0.5 0.4 0.2")</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">        (3, 0.5, 0.5, 0.4, 0.2)</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">        Class 7 does not exist (there are only five defect types, 0-4):</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("7 0.5 0.5 0.4 0.2")</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">        Traceback (most recent call last):</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">            ...</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">        ValueError: Class ID must be between 0 and 4.</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">        The centre (0.9) is inside the photo, but a box 0.4 wide would</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">        stretch from 0.7 to 1.1, past the right-hand edge:</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.9 0.5 0.4 0.2")</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">        Traceback (most recent call last):</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">            ...</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">        ValueError: Bounding box exceeds horizontal image boundaries.</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    """</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"An annotation must have exactly 5 values."</span><span class="p">)</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>        <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Annotation contains invalid numeric values."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">class_id</span> <span class="o">&lt;</span> <span class="n">NUM_CLASSES</span><span class="p">:</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Class ID must be between 0 and 4."</span><span class="p">)</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)):</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box values must be between 0 and 1."</span><span class="p">)</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box dimensions must be positive."</span><span class="p">)</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="c1"># The box edges, not just its centre, must stay inside the image.</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">+</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds horizontal image boundaries."</span><span class="p">)</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">+</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds vertical image boundaries."</span><span class="p">)</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="k">return</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span>
 </span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="k">def</span><span class="w"> </span><span class="nf">find_invalid_annotations</span><span class="p">(</span><span class="n">dataset_dir</span><span class="o">=</span><span class="n">DATASET_DIR</span><span class="p">):</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">    Check every label file in the train, valid and test splits.</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">    Empty label files are allowed, since they represent images with no</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    defects.</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">    Args:</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">        dataset_dir (Path): Root folder of the downloaded dataset.</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">    Returns:</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">        list[str]: One message per invalid line, giving the file, line</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">        number and reason. The list is empty if every annotation is valid.</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">    Example:</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">        ```python</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        problems = find_invalid_annotations()</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        if problems:</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">            print("</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">".join(problems))</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">        ```</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">        A problem message looks like:</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">        ```text</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">        ```</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">    """</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>                <span class="k">try</span><span class="p">:</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="k">return</span> <span class="n">problems</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="k">def</span><span class="w"> </span><span class="nf">find_invalid_annotations</span><span class="p">(</span><span class="n">dataset_dir</span><span class="o">=</span><span class="n">DATASET_DIR</span><span class="p">):</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">    Check every label file in the train, valid and test splits.</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    Empty label files are allowed, since they represent images with no</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">    defects.</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    Args:</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">        dataset_dir (Path): Root folder of the downloaded dataset.</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">    Returns:</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">        list[str]: One message per invalid line, giving the file, line</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">        number and reason. The list is empty if every annotation is valid.</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">    Example:</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        ```python</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        problems = find_invalid_annotations()</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">        if problems:</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">            print("</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">".join(problems))</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">        ```</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">        A problem message looks like:</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">        ```text</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">        ```</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">    """</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>                <span class="k">try</span><span class="p">:</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="k">return</span> <span class="n">problems</span>
 </span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
 </span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>    <span class="n">main</span><span class="p">()</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -301,7 +302,9 @@ The same checks also run automatically in the test suite
     </div>
     <a class="headerlink" href="#DATASET_DIR"></a>
     
-    
+            <div class="docstring"><p>Folder holding the downloaded dataset.</p>
+</div>
+
 
                 </section>
                 <section id="NUM_CLASSES">
@@ -313,7 +316,9 @@ The same checks also run automatically in the test suite
     </div>
     <a class="headerlink" href="#NUM_CLASSES"></a>
     
-    
+            <div class="docstring"><p>Number of defect types. Valid class IDs are 0 to 4.</p>
+</div>
+
 
                 </section>
                 <section id="validate_annotation">
@@ -327,72 +332,72 @@ The same checks also run automatically in the test suite
 
     </div>
     <a class="headerlink" href="#validate_annotation"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="validate_annotation-47"><a href="#validate_annotation-47"><span class="linenos"> 47</span></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-</span><span id="validate_annotation-48"><a href="#validate_annotation-48"><span class="linenos"> 48</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="validate_annotation-49"><a href="#validate_annotation-49"><span class="linenos"> 49</span></a><span class="sd">    Validate a single YOLO annotation line.</span>
-</span><span id="validate_annotation-50"><a href="#validate_annotation-50"><span class="linenos"> 50</span></a>
-</span><span id="validate_annotation-51"><a href="#validate_annotation-51"><span class="linenos"> 51</span></a><span class="sd">    Args:</span>
-</span><span id="validate_annotation-52"><a href="#validate_annotation-52"><span class="linenos"> 52</span></a><span class="sd">        line (str): One line from a YOLO label file, e.g.</span>
-</span><span id="validate_annotation-53"><a href="#validate_annotation-53"><span class="linenos"> 53</span></a><span class="sd">            ``"3 0.5 0.5 0.4 0.2"``.</span>
-</span><span id="validate_annotation-54"><a href="#validate_annotation-54"><span class="linenos"> 54</span></a>
-</span><span id="validate_annotation-55"><a href="#validate_annotation-55"><span class="linenos"> 55</span></a><span class="sd">    Returns:</span>
-</span><span id="validate_annotation-56"><a href="#validate_annotation-56"><span class="linenos"> 56</span></a><span class="sd">        tuple: ``(class_id, x, y, width, height)`` with ``class_id`` as an</span>
-</span><span id="validate_annotation-57"><a href="#validate_annotation-57"><span class="linenos"> 57</span></a><span class="sd">        int and the box values as floats in the range 0 to 1.</span>
-</span><span id="validate_annotation-58"><a href="#validate_annotation-58"><span class="linenos"> 58</span></a>
-</span><span id="validate_annotation-59"><a href="#validate_annotation-59"><span class="linenos"> 59</span></a><span class="sd">    Raises:</span>
-</span><span id="validate_annotation-60"><a href="#validate_annotation-60"><span class="linenos"> 60</span></a><span class="sd">        ValueError: If the line does not have exactly five values, contains</span>
-</span><span id="validate_annotation-61"><a href="#validate_annotation-61"><span class="linenos"> 61</span></a><span class="sd">            non-numeric values, uses an unknown class ID, or describes a box</span>
-</span><span id="validate_annotation-62"><a href="#validate_annotation-62"><span class="linenos"> 62</span></a><span class="sd">            with non-positive size or that extends outside the image.</span>
-</span><span id="validate_annotation-63"><a href="#validate_annotation-63"><span class="linenos"> 63</span></a>
-</span><span id="validate_annotation-64"><a href="#validate_annotation-64"><span class="linenos"> 64</span></a><span class="sd">    Examples:</span>
-</span><span id="validate_annotation-65"><a href="#validate_annotation-65"><span class="linenos"> 65</span></a><span class="sd">        A valid unsealed-pack label (class 3) in the centre of the photo:</span>
-</span><span id="validate_annotation-66"><a href="#validate_annotation-66"><span class="linenos"> 66</span></a>
-</span><span id="validate_annotation-67"><a href="#validate_annotation-67"><span class="linenos"> 67</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.5 0.5 0.4 0.2")</span>
-</span><span id="validate_annotation-68"><a href="#validate_annotation-68"><span class="linenos"> 68</span></a><span class="sd">        (3, 0.5, 0.5, 0.4, 0.2)</span>
-</span><span id="validate_annotation-69"><a href="#validate_annotation-69"><span class="linenos"> 69</span></a>
-</span><span id="validate_annotation-70"><a href="#validate_annotation-70"><span class="linenos"> 70</span></a><span class="sd">        Class 7 does not exist (there are only five defect types, 0-4):</span>
-</span><span id="validate_annotation-71"><a href="#validate_annotation-71"><span class="linenos"> 71</span></a>
-</span><span id="validate_annotation-72"><a href="#validate_annotation-72"><span class="linenos"> 72</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("7 0.5 0.5 0.4 0.2")</span>
-</span><span id="validate_annotation-73"><a href="#validate_annotation-73"><span class="linenos"> 73</span></a><span class="sd">        Traceback (most recent call last):</span>
-</span><span id="validate_annotation-74"><a href="#validate_annotation-74"><span class="linenos"> 74</span></a><span class="sd">            ...</span>
-</span><span id="validate_annotation-75"><a href="#validate_annotation-75"><span class="linenos"> 75</span></a><span class="sd">        ValueError: Class ID must be between 0 and 4.</span>
-</span><span id="validate_annotation-76"><a href="#validate_annotation-76"><span class="linenos"> 76</span></a>
-</span><span id="validate_annotation-77"><a href="#validate_annotation-77"><span class="linenos"> 77</span></a><span class="sd">        The centre (0.9) is inside the photo, but a box 0.4 wide would</span>
-</span><span id="validate_annotation-78"><a href="#validate_annotation-78"><span class="linenos"> 78</span></a><span class="sd">        stretch from 0.7 to 1.1, past the right-hand edge:</span>
-</span><span id="validate_annotation-79"><a href="#validate_annotation-79"><span class="linenos"> 79</span></a>
-</span><span id="validate_annotation-80"><a href="#validate_annotation-80"><span class="linenos"> 80</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.9 0.5 0.4 0.2")</span>
-</span><span id="validate_annotation-81"><a href="#validate_annotation-81"><span class="linenos"> 81</span></a><span class="sd">        Traceback (most recent call last):</span>
-</span><span id="validate_annotation-82"><a href="#validate_annotation-82"><span class="linenos"> 82</span></a><span class="sd">            ...</span>
-</span><span id="validate_annotation-83"><a href="#validate_annotation-83"><span class="linenos"> 83</span></a><span class="sd">        ValueError: Bounding box exceeds horizontal image boundaries.</span>
-</span><span id="validate_annotation-84"><a href="#validate_annotation-84"><span class="linenos"> 84</span></a><span class="sd">    """</span>
-</span><span id="validate_annotation-85"><a href="#validate_annotation-85"><span class="linenos"> 85</span></a>    <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-</span><span id="validate_annotation-86"><a href="#validate_annotation-86"><span class="linenos"> 86</span></a>
-</span><span id="validate_annotation-87"><a href="#validate_annotation-87"><span class="linenos"> 87</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
-</span><span id="validate_annotation-88"><a href="#validate_annotation-88"><span class="linenos"> 88</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"An annotation must have exactly 5 values."</span><span class="p">)</span>
-</span><span id="validate_annotation-89"><a href="#validate_annotation-89"><span class="linenos"> 89</span></a>
-</span><span id="validate_annotation-90"><a href="#validate_annotation-90"><span class="linenos"> 90</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="validate_annotation-91"><a href="#validate_annotation-91"><span class="linenos"> 91</span></a>        <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span id="validate_annotation-92"><a href="#validate_annotation-92"><span class="linenos"> 92</span></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-</span><span id="validate_annotation-93"><a href="#validate_annotation-93"><span class="linenos"> 93</span></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="validate_annotation-94"><a href="#validate_annotation-94"><span class="linenos"> 94</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Annotation contains invalid numeric values."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-</span><span id="validate_annotation-95"><a href="#validate_annotation-95"><span class="linenos"> 95</span></a>
-</span><span id="validate_annotation-96"><a href="#validate_annotation-96"><span class="linenos"> 96</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">class_id</span> <span class="o">&lt;</span> <span class="n">NUM_CLASSES</span><span class="p">:</span>
-</span><span id="validate_annotation-97"><a href="#validate_annotation-97"><span class="linenos"> 97</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Class ID must be between 0 and 4."</span><span class="p">)</span>
-</span><span id="validate_annotation-98"><a href="#validate_annotation-98"><span class="linenos"> 98</span></a>
-</span><span id="validate_annotation-99"><a href="#validate_annotation-99"><span class="linenos"> 99</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)):</span>
-</span><span id="validate_annotation-100"><a href="#validate_annotation-100"><span class="linenos">100</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box values must be between 0 and 1."</span><span class="p">)</span>
-</span><span id="validate_annotation-101"><a href="#validate_annotation-101"><span class="linenos">101</span></a>
-</span><span id="validate_annotation-102"><a href="#validate_annotation-102"><span class="linenos">102</span></a>    <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="validate_annotation-103"><a href="#validate_annotation-103"><span class="linenos">103</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box dimensions must be positive."</span><span class="p">)</span>
-</span><span id="validate_annotation-104"><a href="#validate_annotation-104"><span class="linenos">104</span></a>
-</span><span id="validate_annotation-105"><a href="#validate_annotation-105"><span class="linenos">105</span></a>    <span class="c1"># The box edges, not just its centre, must stay inside the image.</span>
-</span><span id="validate_annotation-106"><a href="#validate_annotation-106"><span class="linenos">106</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">+</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
-</span><span id="validate_annotation-107"><a href="#validate_annotation-107"><span class="linenos">107</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds horizontal image boundaries."</span><span class="p">)</span>
-</span><span id="validate_annotation-108"><a href="#validate_annotation-108"><span class="linenos">108</span></a>
-</span><span id="validate_annotation-109"><a href="#validate_annotation-109"><span class="linenos">109</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">+</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
-</span><span id="validate_annotation-110"><a href="#validate_annotation-110"><span class="linenos">110</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds vertical image boundaries."</span><span class="p">)</span>
-</span><span id="validate_annotation-111"><a href="#validate_annotation-111"><span class="linenos">111</span></a>
-</span><span id="validate_annotation-112"><a href="#validate_annotation-112"><span class="linenos">112</span></a>    <span class="k">return</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="validate_annotation-48"><a href="#validate_annotation-48"><span class="linenos"> 48</span></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span id="validate_annotation-49"><a href="#validate_annotation-49"><span class="linenos"> 49</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="validate_annotation-50"><a href="#validate_annotation-50"><span class="linenos"> 50</span></a><span class="sd">    Validate a single YOLO annotation line.</span>
+</span><span id="validate_annotation-51"><a href="#validate_annotation-51"><span class="linenos"> 51</span></a>
+</span><span id="validate_annotation-52"><a href="#validate_annotation-52"><span class="linenos"> 52</span></a><span class="sd">    Args:</span>
+</span><span id="validate_annotation-53"><a href="#validate_annotation-53"><span class="linenos"> 53</span></a><span class="sd">        line (str): One line from a YOLO label file, e.g.</span>
+</span><span id="validate_annotation-54"><a href="#validate_annotation-54"><span class="linenos"> 54</span></a><span class="sd">            ``"3 0.5 0.5 0.4 0.2"``.</span>
+</span><span id="validate_annotation-55"><a href="#validate_annotation-55"><span class="linenos"> 55</span></a>
+</span><span id="validate_annotation-56"><a href="#validate_annotation-56"><span class="linenos"> 56</span></a><span class="sd">    Returns:</span>
+</span><span id="validate_annotation-57"><a href="#validate_annotation-57"><span class="linenos"> 57</span></a><span class="sd">        tuple: ``(class_id, x, y, width, height)`` with ``class_id`` as an</span>
+</span><span id="validate_annotation-58"><a href="#validate_annotation-58"><span class="linenos"> 58</span></a><span class="sd">        int and the box values as floats in the range 0 to 1.</span>
+</span><span id="validate_annotation-59"><a href="#validate_annotation-59"><span class="linenos"> 59</span></a>
+</span><span id="validate_annotation-60"><a href="#validate_annotation-60"><span class="linenos"> 60</span></a><span class="sd">    Raises:</span>
+</span><span id="validate_annotation-61"><a href="#validate_annotation-61"><span class="linenos"> 61</span></a><span class="sd">        ValueError: If the line does not have exactly five values, contains</span>
+</span><span id="validate_annotation-62"><a href="#validate_annotation-62"><span class="linenos"> 62</span></a><span class="sd">            non-numeric values, uses an unknown class ID, or describes a box</span>
+</span><span id="validate_annotation-63"><a href="#validate_annotation-63"><span class="linenos"> 63</span></a><span class="sd">            with non-positive size or that extends outside the image.</span>
+</span><span id="validate_annotation-64"><a href="#validate_annotation-64"><span class="linenos"> 64</span></a>
+</span><span id="validate_annotation-65"><a href="#validate_annotation-65"><span class="linenos"> 65</span></a><span class="sd">    Examples:</span>
+</span><span id="validate_annotation-66"><a href="#validate_annotation-66"><span class="linenos"> 66</span></a><span class="sd">        A valid unsealed-pack label (class 3) in the centre of the photo:</span>
+</span><span id="validate_annotation-67"><a href="#validate_annotation-67"><span class="linenos"> 67</span></a>
+</span><span id="validate_annotation-68"><a href="#validate_annotation-68"><span class="linenos"> 68</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.5 0.5 0.4 0.2")</span>
+</span><span id="validate_annotation-69"><a href="#validate_annotation-69"><span class="linenos"> 69</span></a><span class="sd">        (3, 0.5, 0.5, 0.4, 0.2)</span>
+</span><span id="validate_annotation-70"><a href="#validate_annotation-70"><span class="linenos"> 70</span></a>
+</span><span id="validate_annotation-71"><a href="#validate_annotation-71"><span class="linenos"> 71</span></a><span class="sd">        Class 7 does not exist (there are only five defect types, 0-4):</span>
+</span><span id="validate_annotation-72"><a href="#validate_annotation-72"><span class="linenos"> 72</span></a>
+</span><span id="validate_annotation-73"><a href="#validate_annotation-73"><span class="linenos"> 73</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("7 0.5 0.5 0.4 0.2")</span>
+</span><span id="validate_annotation-74"><a href="#validate_annotation-74"><span class="linenos"> 74</span></a><span class="sd">        Traceback (most recent call last):</span>
+</span><span id="validate_annotation-75"><a href="#validate_annotation-75"><span class="linenos"> 75</span></a><span class="sd">            ...</span>
+</span><span id="validate_annotation-76"><a href="#validate_annotation-76"><span class="linenos"> 76</span></a><span class="sd">        ValueError: Class ID must be between 0 and 4.</span>
+</span><span id="validate_annotation-77"><a href="#validate_annotation-77"><span class="linenos"> 77</span></a>
+</span><span id="validate_annotation-78"><a href="#validate_annotation-78"><span class="linenos"> 78</span></a><span class="sd">        The centre (0.9) is inside the photo, but a box 0.4 wide would</span>
+</span><span id="validate_annotation-79"><a href="#validate_annotation-79"><span class="linenos"> 79</span></a><span class="sd">        stretch from 0.7 to 1.1, past the right-hand edge:</span>
+</span><span id="validate_annotation-80"><a href="#validate_annotation-80"><span class="linenos"> 80</span></a>
+</span><span id="validate_annotation-81"><a href="#validate_annotation-81"><span class="linenos"> 81</span></a><span class="sd">        &gt;&gt;&gt; validate_annotation("3 0.9 0.5 0.4 0.2")</span>
+</span><span id="validate_annotation-82"><a href="#validate_annotation-82"><span class="linenos"> 82</span></a><span class="sd">        Traceback (most recent call last):</span>
+</span><span id="validate_annotation-83"><a href="#validate_annotation-83"><span class="linenos"> 83</span></a><span class="sd">            ...</span>
+</span><span id="validate_annotation-84"><a href="#validate_annotation-84"><span class="linenos"> 84</span></a><span class="sd">        ValueError: Bounding box exceeds horizontal image boundaries.</span>
+</span><span id="validate_annotation-85"><a href="#validate_annotation-85"><span class="linenos"> 85</span></a><span class="sd">    """</span>
+</span><span id="validate_annotation-86"><a href="#validate_annotation-86"><span class="linenos"> 86</span></a>    <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</span><span id="validate_annotation-87"><a href="#validate_annotation-87"><span class="linenos"> 87</span></a>
+</span><span id="validate_annotation-88"><a href="#validate_annotation-88"><span class="linenos"> 88</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+</span><span id="validate_annotation-89"><a href="#validate_annotation-89"><span class="linenos"> 89</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"An annotation must have exactly 5 values."</span><span class="p">)</span>
+</span><span id="validate_annotation-90"><a href="#validate_annotation-90"><span class="linenos"> 90</span></a>
+</span><span id="validate_annotation-91"><a href="#validate_annotation-91"><span class="linenos"> 91</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="validate_annotation-92"><a href="#validate_annotation-92"><span class="linenos"> 92</span></a>        <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="validate_annotation-93"><a href="#validate_annotation-93"><span class="linenos"> 93</span></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</span><span id="validate_annotation-94"><a href="#validate_annotation-94"><span class="linenos"> 94</span></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="validate_annotation-95"><a href="#validate_annotation-95"><span class="linenos"> 95</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Annotation contains invalid numeric values."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+</span><span id="validate_annotation-96"><a href="#validate_annotation-96"><span class="linenos"> 96</span></a>
+</span><span id="validate_annotation-97"><a href="#validate_annotation-97"><span class="linenos"> 97</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">class_id</span> <span class="o">&lt;</span> <span class="n">NUM_CLASSES</span><span class="p">:</span>
+</span><span id="validate_annotation-98"><a href="#validate_annotation-98"><span class="linenos"> 98</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Class ID must be between 0 and 4."</span><span class="p">)</span>
+</span><span id="validate_annotation-99"><a href="#validate_annotation-99"><span class="linenos"> 99</span></a>
+</span><span id="validate_annotation-100"><a href="#validate_annotation-100"><span class="linenos">100</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)):</span>
+</span><span id="validate_annotation-101"><a href="#validate_annotation-101"><span class="linenos">101</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box values must be between 0 and 1."</span><span class="p">)</span>
+</span><span id="validate_annotation-102"><a href="#validate_annotation-102"><span class="linenos">102</span></a>
+</span><span id="validate_annotation-103"><a href="#validate_annotation-103"><span class="linenos">103</span></a>    <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="validate_annotation-104"><a href="#validate_annotation-104"><span class="linenos">104</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding-box dimensions must be positive."</span><span class="p">)</span>
+</span><span id="validate_annotation-105"><a href="#validate_annotation-105"><span class="linenos">105</span></a>
+</span><span id="validate_annotation-106"><a href="#validate_annotation-106"><span class="linenos">106</span></a>    <span class="c1"># The box edges, not just its centre, must stay inside the image.</span>
+</span><span id="validate_annotation-107"><a href="#validate_annotation-107"><span class="linenos">107</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">+</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="validate_annotation-108"><a href="#validate_annotation-108"><span class="linenos">108</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds horizontal image boundaries."</span><span class="p">)</span>
+</span><span id="validate_annotation-109"><a href="#validate_annotation-109"><span class="linenos">109</span></a>
+</span><span id="validate_annotation-110"><a href="#validate_annotation-110"><span class="linenos">110</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">+</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="validate_annotation-111"><a href="#validate_annotation-111"><span class="linenos">111</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bounding box exceeds vertical image boundaries."</span><span class="p">)</span>
+</span><span id="validate_annotation-112"><a href="#validate_annotation-112"><span class="linenos">112</span></a>
+</span><span id="validate_annotation-113"><a href="#validate_annotation-113"><span class="linenos">113</span></a>    <span class="k">return</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span>
 </span></pre></div>
 
 
@@ -467,47 +472,47 @@ with non-positive size or that extends outside the image.</li>
 
     </div>
     <a class="headerlink" href="#find_invalid_annotations"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="find_invalid_annotations-115"><a href="#find_invalid_annotations-115"><span class="linenos">115</span></a><span class="k">def</span><span class="w"> </span><span class="nf">find_invalid_annotations</span><span class="p">(</span><span class="n">dataset_dir</span><span class="o">=</span><span class="n">DATASET_DIR</span><span class="p">):</span>
-</span><span id="find_invalid_annotations-116"><a href="#find_invalid_annotations-116"><span class="linenos">116</span></a><span class="w">    </span><span class="sd">"""</span>
-</span><span id="find_invalid_annotations-117"><a href="#find_invalid_annotations-117"><span class="linenos">117</span></a><span class="sd">    Check every label file in the train, valid and test splits.</span>
-</span><span id="find_invalid_annotations-118"><a href="#find_invalid_annotations-118"><span class="linenos">118</span></a>
-</span><span id="find_invalid_annotations-119"><a href="#find_invalid_annotations-119"><span class="linenos">119</span></a><span class="sd">    Empty label files are allowed, since they represent images with no</span>
-</span><span id="find_invalid_annotations-120"><a href="#find_invalid_annotations-120"><span class="linenos">120</span></a><span class="sd">    defects.</span>
-</span><span id="find_invalid_annotations-121"><a href="#find_invalid_annotations-121"><span class="linenos">121</span></a>
-</span><span id="find_invalid_annotations-122"><a href="#find_invalid_annotations-122"><span class="linenos">122</span></a><span class="sd">    Args:</span>
-</span><span id="find_invalid_annotations-123"><a href="#find_invalid_annotations-123"><span class="linenos">123</span></a><span class="sd">        dataset_dir (Path): Root folder of the downloaded dataset.</span>
-</span><span id="find_invalid_annotations-124"><a href="#find_invalid_annotations-124"><span class="linenos">124</span></a>
-</span><span id="find_invalid_annotations-125"><a href="#find_invalid_annotations-125"><span class="linenos">125</span></a><span class="sd">    Returns:</span>
-</span><span id="find_invalid_annotations-126"><a href="#find_invalid_annotations-126"><span class="linenos">126</span></a><span class="sd">        list[str]: One message per invalid line, giving the file, line</span>
-</span><span id="find_invalid_annotations-127"><a href="#find_invalid_annotations-127"><span class="linenos">127</span></a><span class="sd">        number and reason. The list is empty if every annotation is valid.</span>
-</span><span id="find_invalid_annotations-128"><a href="#find_invalid_annotations-128"><span class="linenos">128</span></a>
-</span><span id="find_invalid_annotations-129"><a href="#find_invalid_annotations-129"><span class="linenos">129</span></a><span class="sd">    Example:</span>
-</span><span id="find_invalid_annotations-130"><a href="#find_invalid_annotations-130"><span class="linenos">130</span></a><span class="sd">        ```python</span>
-</span><span id="find_invalid_annotations-131"><a href="#find_invalid_annotations-131"><span class="linenos">131</span></a><span class="sd">        problems = find_invalid_annotations()</span>
-</span><span id="find_invalid_annotations-132"><a href="#find_invalid_annotations-132"><span class="linenos">132</span></a><span class="sd">        if problems:</span>
-</span><span id="find_invalid_annotations-133"><a href="#find_invalid_annotations-133"><span class="linenos">133</span></a><span class="sd">            print("</span>
-</span><span id="find_invalid_annotations-134"><a href="#find_invalid_annotations-134"><span class="linenos">134</span></a><span class="sd">".join(problems))</span>
-</span><span id="find_invalid_annotations-135"><a href="#find_invalid_annotations-135"><span class="linenos">135</span></a><span class="sd">        ```</span>
-</span><span id="find_invalid_annotations-136"><a href="#find_invalid_annotations-136"><span class="linenos">136</span></a>
-</span><span id="find_invalid_annotations-137"><a href="#find_invalid_annotations-137"><span class="linenos">137</span></a><span class="sd">        A problem message looks like:</span>
-</span><span id="find_invalid_annotations-138"><a href="#find_invalid_annotations-138"><span class="linenos">138</span></a>
-</span><span id="find_invalid_annotations-139"><a href="#find_invalid_annotations-139"><span class="linenos">139</span></a><span class="sd">        ```text</span>
-</span><span id="find_invalid_annotations-140"><a href="#find_invalid_annotations-140"><span class="linenos">140</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
-</span><span id="find_invalid_annotations-141"><a href="#find_invalid_annotations-141"><span class="linenos">141</span></a><span class="sd">        ```</span>
-</span><span id="find_invalid_annotations-142"><a href="#find_invalid_annotations-142"><span class="linenos">142</span></a><span class="sd">    """</span>
-</span><span id="find_invalid_annotations-143"><a href="#find_invalid_annotations-143"><span class="linenos">143</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="find_invalid_annotations-144"><a href="#find_invalid_annotations-144"><span class="linenos">144</span></a>
-</span><span id="find_invalid_annotations-145"><a href="#find_invalid_annotations-145"><span class="linenos">145</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
-</span><span id="find_invalid_annotations-146"><a href="#find_invalid_annotations-146"><span class="linenos">146</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
-</span><span id="find_invalid_annotations-147"><a href="#find_invalid_annotations-147"><span class="linenos">147</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span id="find_invalid_annotations-148"><a href="#find_invalid_annotations-148"><span class="linenos">148</span></a>
-</span><span id="find_invalid_annotations-149"><a href="#find_invalid_annotations-149"><span class="linenos">149</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-</span><span id="find_invalid_annotations-150"><a href="#find_invalid_annotations-150"><span class="linenos">150</span></a>                <span class="k">try</span><span class="p">:</span>
-</span><span id="find_invalid_annotations-151"><a href="#find_invalid_annotations-151"><span class="linenos">151</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span id="find_invalid_annotations-152"><a href="#find_invalid_annotations-152"><span class="linenos">152</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="find_invalid_annotations-153"><a href="#find_invalid_annotations-153"><span class="linenos">153</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="find_invalid_annotations-154"><a href="#find_invalid_annotations-154"><span class="linenos">154</span></a>
-</span><span id="find_invalid_annotations-155"><a href="#find_invalid_annotations-155"><span class="linenos">155</span></a>    <span class="k">return</span> <span class="n">problems</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="find_invalid_annotations-116"><a href="#find_invalid_annotations-116"><span class="linenos">116</span></a><span class="k">def</span><span class="w"> </span><span class="nf">find_invalid_annotations</span><span class="p">(</span><span class="n">dataset_dir</span><span class="o">=</span><span class="n">DATASET_DIR</span><span class="p">):</span>
+</span><span id="find_invalid_annotations-117"><a href="#find_invalid_annotations-117"><span class="linenos">117</span></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="find_invalid_annotations-118"><a href="#find_invalid_annotations-118"><span class="linenos">118</span></a><span class="sd">    Check every label file in the train, valid and test splits.</span>
+</span><span id="find_invalid_annotations-119"><a href="#find_invalid_annotations-119"><span class="linenos">119</span></a>
+</span><span id="find_invalid_annotations-120"><a href="#find_invalid_annotations-120"><span class="linenos">120</span></a><span class="sd">    Empty label files are allowed, since they represent images with no</span>
+</span><span id="find_invalid_annotations-121"><a href="#find_invalid_annotations-121"><span class="linenos">121</span></a><span class="sd">    defects.</span>
+</span><span id="find_invalid_annotations-122"><a href="#find_invalid_annotations-122"><span class="linenos">122</span></a>
+</span><span id="find_invalid_annotations-123"><a href="#find_invalid_annotations-123"><span class="linenos">123</span></a><span class="sd">    Args:</span>
+</span><span id="find_invalid_annotations-124"><a href="#find_invalid_annotations-124"><span class="linenos">124</span></a><span class="sd">        dataset_dir (Path): Root folder of the downloaded dataset.</span>
+</span><span id="find_invalid_annotations-125"><a href="#find_invalid_annotations-125"><span class="linenos">125</span></a>
+</span><span id="find_invalid_annotations-126"><a href="#find_invalid_annotations-126"><span class="linenos">126</span></a><span class="sd">    Returns:</span>
+</span><span id="find_invalid_annotations-127"><a href="#find_invalid_annotations-127"><span class="linenos">127</span></a><span class="sd">        list[str]: One message per invalid line, giving the file, line</span>
+</span><span id="find_invalid_annotations-128"><a href="#find_invalid_annotations-128"><span class="linenos">128</span></a><span class="sd">        number and reason. The list is empty if every annotation is valid.</span>
+</span><span id="find_invalid_annotations-129"><a href="#find_invalid_annotations-129"><span class="linenos">129</span></a>
+</span><span id="find_invalid_annotations-130"><a href="#find_invalid_annotations-130"><span class="linenos">130</span></a><span class="sd">    Example:</span>
+</span><span id="find_invalid_annotations-131"><a href="#find_invalid_annotations-131"><span class="linenos">131</span></a><span class="sd">        ```python</span>
+</span><span id="find_invalid_annotations-132"><a href="#find_invalid_annotations-132"><span class="linenos">132</span></a><span class="sd">        problems = find_invalid_annotations()</span>
+</span><span id="find_invalid_annotations-133"><a href="#find_invalid_annotations-133"><span class="linenos">133</span></a><span class="sd">        if problems:</span>
+</span><span id="find_invalid_annotations-134"><a href="#find_invalid_annotations-134"><span class="linenos">134</span></a><span class="sd">            print("</span>
+</span><span id="find_invalid_annotations-135"><a href="#find_invalid_annotations-135"><span class="linenos">135</span></a><span class="sd">".join(problems))</span>
+</span><span id="find_invalid_annotations-136"><a href="#find_invalid_annotations-136"><span class="linenos">136</span></a><span class="sd">        ```</span>
+</span><span id="find_invalid_annotations-137"><a href="#find_invalid_annotations-137"><span class="linenos">137</span></a>
+</span><span id="find_invalid_annotations-138"><a href="#find_invalid_annotations-138"><span class="linenos">138</span></a><span class="sd">        A problem message looks like:</span>
+</span><span id="find_invalid_annotations-139"><a href="#find_invalid_annotations-139"><span class="linenos">139</span></a>
+</span><span id="find_invalid_annotations-140"><a href="#find_invalid_annotations-140"><span class="linenos">140</span></a><span class="sd">        ```text</span>
+</span><span id="find_invalid_annotations-141"><a href="#find_invalid_annotations-141"><span class="linenos">141</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
+</span><span id="find_invalid_annotations-142"><a href="#find_invalid_annotations-142"><span class="linenos">142</span></a><span class="sd">        ```</span>
+</span><span id="find_invalid_annotations-143"><a href="#find_invalid_annotations-143"><span class="linenos">143</span></a><span class="sd">    """</span>
+</span><span id="find_invalid_annotations-144"><a href="#find_invalid_annotations-144"><span class="linenos">144</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="find_invalid_annotations-145"><a href="#find_invalid_annotations-145"><span class="linenos">145</span></a>
+</span><span id="find_invalid_annotations-146"><a href="#find_invalid_annotations-146"><span class="linenos">146</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
+</span><span id="find_invalid_annotations-147"><a href="#find_invalid_annotations-147"><span class="linenos">147</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
+</span><span id="find_invalid_annotations-148"><a href="#find_invalid_annotations-148"><span class="linenos">148</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span id="find_invalid_annotations-149"><a href="#find_invalid_annotations-149"><span class="linenos">149</span></a>
+</span><span id="find_invalid_annotations-150"><a href="#find_invalid_annotations-150"><span class="linenos">150</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="find_invalid_annotations-151"><a href="#find_invalid_annotations-151"><span class="linenos">151</span></a>                <span class="k">try</span><span class="p">:</span>
+</span><span id="find_invalid_annotations-152"><a href="#find_invalid_annotations-152"><span class="linenos">152</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="find_invalid_annotations-153"><a href="#find_invalid_annotations-153"><span class="linenos">153</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="find_invalid_annotations-154"><a href="#find_invalid_annotations-154"><span class="linenos">154</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="find_invalid_annotations-155"><a href="#find_invalid_annotations-155"><span class="linenos">155</span></a>
+</span><span id="find_invalid_annotations-156"><a href="#find_invalid_annotations-156"><span class="linenos">156</span></a>    <span class="k">return</span> <span class="n">problems</span>
 </span></pre></div>
 
 
@@ -560,14 +565,14 @@ Example:
 
     </div>
     <a class="headerlink" href="#main"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="main-158"><a href="#main-158"><span class="linenos">158</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="main-159"><a href="#main-159"><span class="linenos">159</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
-</span><span id="main-160"><a href="#main-160"><span class="linenos">160</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
-</span><span id="main-161"><a href="#main-161"><span class="linenos">161</span></a>
-</span><span id="main-162"><a href="#main-162"><span class="linenos">162</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
-</span><span id="main-163"><a href="#main-163"><span class="linenos">163</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
-</span><span id="main-164"><a href="#main-164"><span class="linenos">164</span></a>
-</span><span id="main-165"><a href="#main-165"><span class="linenos">165</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="main-159"><a href="#main-159"><span class="linenos">159</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="main-160"><a href="#main-160"><span class="linenos">160</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
+</span><span id="main-161"><a href="#main-161"><span class="linenos">161</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
+</span><span id="main-162"><a href="#main-162"><span class="linenos">162</span></a>
+</span><span id="main-163"><a href="#main-163"><span class="linenos">163</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
+</span><span id="main-164"><a href="#main-164"><span class="linenos">164</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+</span><span id="main-165"><a href="#main-165"><span class="linenos">165</span></a>
+</span><span id="main-166"><a href="#main-166"><span class="linenos">166</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
 </span></pre></div>
 
 
