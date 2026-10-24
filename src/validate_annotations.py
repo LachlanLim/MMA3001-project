@@ -1,12 +1,37 @@
 """
-Validate YOLO bounding-box annotations for the pork-packaging dataset.
+Check that every defect label in the dataset is valid.
 
-Each YOLO label file contains one object per line in the form
-``class_id x_center y_center width height``. The four box values are
-normalised to the image size, so they must lie between 0 and 1.
+**Why this matters:** the model learns from the labels, so a single
+corrupt label (a box outside the photo, or an unknown defect type) can
+silently teach it the wrong thing. Labelling tools and dataset exports
+do occasionally produce such errors, so all 3,123 labels are checked
+before any training is done.
 
-Run from the project root to check every label file in the dataset:
-    python src/validate_annotations.py
+Each photo has a matching ``.txt`` label file with one line per defect:
+
+```text
+class_id x_center y_center width height
+```
+
+For example, this real line from the training set marks a packaging
+error (class 1) near the bottom-right of the photo, about 6% of the
+photo wide and 9% tall:
+
+```text
+1 0.8827 0.7624 0.0586 0.0926
+```
+
+Usage, from the project root:
+
+```text
+$ python src/validate_annotations.py
+
+0 invalid annotation(s) found.
+```
+
+Any invalid lines are listed with their file, line number and reason.
+The same checks also run automatically in the test suite
+(``tests/test_annotations.py``).
 """
 
 from pathlib import Path
@@ -34,6 +59,27 @@ def validate_annotation(line):
         ValueError: If the line does not have exactly five values, contains
             non-numeric values, uses an unknown class ID, or describes a box
             with non-positive size or that extends outside the image.
+
+    Examples:
+        A valid unsealed-pack label (class 3) in the centre of the photo:
+
+        >>> validate_annotation("3 0.5 0.5 0.4 0.2")
+        (3, 0.5, 0.5, 0.4, 0.2)
+
+        Class 7 does not exist (there are only five defect types, 0-4):
+
+        >>> validate_annotation("7 0.5 0.5 0.4 0.2")
+        Traceback (most recent call last):
+            ...
+        ValueError: Class ID must be between 0 and 4.
+
+        The centre (0.9) is inside the photo, but a box 0.4 wide would
+        stretch from 0.7 to 1.1, past the right-hand edge:
+
+        >>> validate_annotation("3 0.9 0.5 0.4 0.2")
+        Traceback (most recent call last):
+            ...
+        ValueError: Bounding box exceeds horizontal image boundaries.
     """
     values = line.strip().split()
 
@@ -78,6 +124,20 @@ def find_invalid_annotations(dataset_dir=DATASET_DIR):
     Returns:
         list[str]: One message per invalid line, giving the file, line
         number and reason. The list is empty if every annotation is valid.
+
+    Example:
+        ```python
+        problems = find_invalid_annotations()
+        if problems:
+            print("
+".join(problems))
+        ```
+
+        A problem message looks like:
+
+        ```text
+        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.
+        ```
     """
     problems = []
 

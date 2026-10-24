@@ -1,13 +1,34 @@
 """
-Draw ground-truth bounding boxes on sample training images.
+Draw the labelled defect boxes onto sample photos, to check them by eye.
 
-This module picks 10 random training images, draws their YOLO
-annotations as labelled red boxes and saves the results. It is used
-to visually check that the labels line up with the defects before
-training.
+Automated checks (``src.validate_annotations``) confirm that every
+label is *well-formed*, but not that it is *correct*: a box could be
+valid yet sit on the wrong part of the pack, or carry the wrong defect
+type. Looking at a sample of labelled photos catches these mistakes,
+which would otherwise teach the model the wrong thing.
+
+## Usage
 
 Run from the project root:
-    python src/visualise_labels.py
+
+```text
+$ python src/visualise_labels.py
+Classes:
+0 loose-meat
+1 packaging-error
+2 twisted-meat
+3 unsealed
+4 wrinkle
+Saved: results/label_checks/frame_with_red_....jpg
+...
+
+Finished visualising labels.
+```
+
+Ten training photos are chosen at random (with a fixed seed, so the same
+ten every time) and saved to ``results/label_checks/`` with each
+labelled defect drawn as a red box and named. Open them and check that
+each box sits on a real defect of the named type.
 """
 
 from pathlib import Path
@@ -43,6 +64,16 @@ def draw_labels(image_path, label_path, class_names):
 
     Returns:
         PIL.Image.Image: RGB copy of the image with boxes and class names.
+
+    Example:
+        ```python
+        image = draw_labels(
+            Path("data/.../train/images/frame_35.jpg"),
+            Path("data/.../train/labels/frame_35.txt"),
+            ["loose-meat", "packaging-error", "twisted-meat", "unsealed", "wrinkle"],
+        )
+        image.show()   # opens the photo with its defects outlined in red
+        ```
     """
     image = Image.open(image_path).convert("RGB")
     draw = ImageDraw.Draw(image)

@@ -1,18 +1,29 @@
 """
-Resume an interrupted YOLO11s training experiment.
+Continue the YOLO11 small training run after an interruption.
 
-This module resumes the YOLO11s comparison experiment using
-the last.pt checkpoint saved by Ultralytics.
+Training takes over an hour, and can be cut short by a crash, a power
+cut or the computer going to sleep. Ultralytics saves a checkpoint
+(``last.pt``) after every epoch, holding the model and the training
+progress. This script picks up from that checkpoint instead of starting
+again from epoch 1.
 
-The checkpoint preserves training progress so that the experiment
-can continue towards its original 50-epoch target without
-starting from epoch 1 again.
+This happened during the project: the YOLO11 small run stopped after
+epoch 18 and was resumed with this script to finish all 50 epochs.
 
-The script is intended for recovery from interrupted training,
-not for starting a new experiment.
+Use it only to recover an interrupted run, not to start a new one.
+
+## Usage
 
 Run from the project root:
-    python src/resume_yolo11s.py
+
+```text
+$ python src/resume_yolo11s.py
+Resuming training ... from epoch 19 to 50 total epochs
+```
+
+**Note:** resuming restarts the training clock in Ultralytics'
+``results.csv``. ``src.evaluate`` allows for this when it reports the
+total training time.
 """
 
 from pathlib import Path

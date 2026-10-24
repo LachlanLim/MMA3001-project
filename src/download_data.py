@@ -1,14 +1,45 @@
 """
-Download the pork-rasher packaging defect dataset from Roboflow.
+Download the pork-pack photos and their defect labels from Roboflow.
 
-Downloads Version 4 of the Pork-Rasher-Error(Packaging) dataset
-in YOLO11 object-detection format.
+The dataset is *Pork-Rasher-Error (Packaging)*, version 4, hosted on
+[Roboflow Universe](https://universe.roboflow.com/hello-2aqe0/pork-rasher-error-packaging/dataset/4)
+under the CC BY 4.0 licence (free to use with credit). It holds 3,549
+photos, each with a label file marking where the defects are.
 
-The Roboflow API key is read from the ROBOFLOW_API_KEY
-environment variable rather than being stored in the code.
+The photos are not stored in this repository, because they belong to
+the dataset's authors and are about 240 MB. Anyone reproducing the
+project downloads them with this script instead.
 
-Run from the project root:
-    python src/download_data.py
+## Usage
+
+1. Create a free account at [roboflow.com](https://roboflow.com) and
+   copy your API key from *Settings → API Keys*.
+2. Store the key in an environment variable, so it is never written
+   into the code or uploaded to GitHub:
+
+   ```text
+   set ROBOFLOW_API_KEY=your_key_here         (Windows)
+   export ROBOFLOW_API_KEY=your_key_here      (macOS/Linux)
+   ```
+
+3. Run from the project root:
+
+   ```text
+   $ python src/download_data.py
+   Dataset downloaded successfully.
+   .../data/Pork-Rasher-Error(Packaging)-4
+   ```
+
+The download creates:
+
+```text
+data/Pork-Rasher-Error(Packaging)-4/
+├── data.yaml          defect type names and folder locations
+├── train/images/      3349 photos the model learns from
+├── train/labels/      one .txt label file per photo
+├── valid/             120 photos for choosing settings
+└── test/              80 photos for the final check
+```
 """
 
 import os
@@ -25,7 +56,9 @@ def main():
     ``data/Pork-Rasher-Error(Packaging)-4``.
 
     Raises:
-        RuntimeError: If ROBOFLOW_API_KEY has not been set.
+        RuntimeError: If ROBOFLOW_API_KEY has not been set. This is
+            checked first, so a missing key fails immediately with a
+            clear message instead of an unclear network error.
     """
 
     # Read API key securely from environment variables.
