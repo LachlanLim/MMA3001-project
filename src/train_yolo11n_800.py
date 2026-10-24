@@ -52,6 +52,7 @@ from ultralytics import YOLO
 DATA_YAML = Path(
     "data/Pork-Rasher-Error(Packaging)-4/data.yaml"
 )
+"""Dataset settings file, telling Ultralytics where the photos and labels are."""
 
 
 def main():

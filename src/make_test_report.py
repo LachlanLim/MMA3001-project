@@ -39,10 +39,14 @@ from validate_annotations import validate_annotation
 
 
 XML_PATH = Path("results/test_reports/all_tests.xml")
-OUTPUT_PATH = Path("results/test_reports/test_summary.html")
-TESTS_DIR = Path("tests")
+"""Test results saved by ``pytest --junitxml``, read as input."""
 
-# Friendly titles for each test module
+OUTPUT_PATH = Path("results/test_reports/test_summary.html")
+"""Where the HTML report is saved."""
+
+TESTS_DIR = Path("tests")
+"""Folder of test files, read to get each test's description."""
+
 SUITE_TITLES = {
     "tests.test_dataset": (
         "Dataset configuration",
@@ -60,6 +64,7 @@ SUITE_TITLES = {
         "they give the output shown.",
     ),
 }
+"""Section heading and plain-English summary for each test file, keyed by module name."""
 
 
 # --------------------------------------------------

@@ -41,9 +41,11 @@ from pathlib import Path
 import yaml
 
 
-# Dataset configuration paths, relative to the project root.
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
+"""Folder holding the downloaded dataset."""
+
 YAML_PATH = DATASET_DIR / "data.yaml"
+"""Dataset settings file listing the defect types and photo folders."""
 
 
 def main():
