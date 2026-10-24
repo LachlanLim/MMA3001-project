@@ -116,10 +116,11 @@ The tests check the dataset configuration, the split folders and every YOLO labe
 
 ## Documentation
 
-HTML documentation of the source code is in [`docs/`](docs/index.html). To regenerate it:
+HTML documentation of the source code is in [`docs/`](docs/index.html). Open `docs/index.html` in a browser. To regenerate it after changing any docstrings:
 
 ```bash
-pdoc -d google src/*.py -o docs
+set PYTHONPATH=src                  # Windows (use export on macOS/Linux)
+pdoc -d google --mermaid --footer-text "MMA3001 Project · Lachlan Lim" src -o docs
 ```
 
 ## Results
