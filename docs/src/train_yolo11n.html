@@ -218,31 +218,32 @@ printed after every epoch.</p>
 </span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="n">DATA_YAML</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
 </span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>    <span class="s2">"data/Pork-Rasher-Error(Packaging)-4/data.yaml"</span>
 </span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="p">)</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">"""Dataset settings file, telling Ultralytics where the photos and labels are."""</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="w">    </span><span class="sd">"""Train the model and save the results (see the module description)."""</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>    <span class="c1"># Load pretrained YOLO11 Nano model</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"yolo11n.pt"</span><span class="p">)</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>        <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">DATA_YAML</span><span class="p">),</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>        <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>        <span class="n">imgsz</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>        <span class="n">batch</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>        <span class="n">device</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>        <span class="n">workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a>        <span class="n">project</span><span class="o">=</span><span class="s2">"results/training"</span><span class="p">,</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"yolo11n_baseline"</span><span class="p">,</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>        <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="p">)</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>
-</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training completed."</span><span class="p">)</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="w">    </span><span class="sd">"""Train the model and save the results (see the module description)."""</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>    <span class="c1"># Load pretrained YOLO11 Nano model</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"yolo11n.pt"</span><span class="p">)</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>        <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">DATA_YAML</span><span class="p">),</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>        <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>        <span class="n">imgsz</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>        <span class="n">batch</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>        <span class="n">device</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a>        <span class="n">workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>        <span class="n">project</span><span class="o">=</span><span class="s2">"results/training"</span><span class="p">,</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"yolo11n_baseline"</span><span class="p">,</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>        <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>    <span class="p">)</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>
+</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training completed."</span><span class="p">)</span>
 </span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>
-</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a>    <span class="n">main</span><span class="p">()</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a>
+</span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -256,7 +257,9 @@ printed after every epoch.</p>
     </div>
     <a class="headerlink" href="#DATA_YAML"></a>
     
-    
+            <div class="docstring"><p>Dataset settings file, telling Ultralytics where the photos and labels are.</p>
+</div>
+
 
                 </section>
                 <section id="main">
@@ -270,25 +273,25 @@ printed after every epoch.</p>
 
     </div>
     <a class="headerlink" href="#main"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="main-59"><a href="#main-59"><span class="linenos">59</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="main-60"><a href="#main-60"><span class="linenos">60</span></a><span class="w">    </span><span class="sd">"""Train the model and save the results (see the module description)."""</span>
-</span><span id="main-61"><a href="#main-61"><span class="linenos">61</span></a>    <span class="c1"># Load pretrained YOLO11 Nano model</span>
-</span><span id="main-62"><a href="#main-62"><span class="linenos">62</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"yolo11n.pt"</span><span class="p">)</span>
-</span><span id="main-63"><a href="#main-63"><span class="linenos">63</span></a>
-</span><span id="main-64"><a href="#main-64"><span class="linenos">64</span></a>    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
-</span><span id="main-65"><a href="#main-65"><span class="linenos">65</span></a>        <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">DATA_YAML</span><span class="p">),</span>
-</span><span id="main-66"><a href="#main-66"><span class="linenos">66</span></a>        <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-</span><span id="main-67"><a href="#main-67"><span class="linenos">67</span></a>        <span class="n">imgsz</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span>
-</span><span id="main-68"><a href="#main-68"><span class="linenos">68</span></a>        <span class="n">batch</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-</span><span id="main-69"><a href="#main-69"><span class="linenos">69</span></a>        <span class="n">device</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="main-70"><a href="#main-70"><span class="linenos">70</span></a>        <span class="n">workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="main-71"><a href="#main-71"><span class="linenos">71</span></a>        <span class="n">project</span><span class="o">=</span><span class="s2">"results/training"</span><span class="p">,</span>
-</span><span id="main-72"><a href="#main-72"><span class="linenos">72</span></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"yolo11n_baseline"</span><span class="p">,</span>
-</span><span id="main-73"><a href="#main-73"><span class="linenos">73</span></a>        <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="main-74"><a href="#main-74"><span class="linenos">74</span></a>        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-</span><span id="main-75"><a href="#main-75"><span class="linenos">75</span></a>    <span class="p">)</span>
-</span><span id="main-76"><a href="#main-76"><span class="linenos">76</span></a>
-</span><span id="main-77"><a href="#main-77"><span class="linenos">77</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training completed."</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="main-60"><a href="#main-60"><span class="linenos">60</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="main-61"><a href="#main-61"><span class="linenos">61</span></a><span class="w">    </span><span class="sd">"""Train the model and save the results (see the module description)."""</span>
+</span><span id="main-62"><a href="#main-62"><span class="linenos">62</span></a>    <span class="c1"># Load pretrained YOLO11 Nano model</span>
+</span><span id="main-63"><a href="#main-63"><span class="linenos">63</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"yolo11n.pt"</span><span class="p">)</span>
+</span><span id="main-64"><a href="#main-64"><span class="linenos">64</span></a>
+</span><span id="main-65"><a href="#main-65"><span class="linenos">65</span></a>    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+</span><span id="main-66"><a href="#main-66"><span class="linenos">66</span></a>        <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">DATA_YAML</span><span class="p">),</span>
+</span><span id="main-67"><a href="#main-67"><span class="linenos">67</span></a>        <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span id="main-68"><a href="#main-68"><span class="linenos">68</span></a>        <span class="n">imgsz</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span>
+</span><span id="main-69"><a href="#main-69"><span class="linenos">69</span></a>        <span class="n">batch</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+</span><span id="main-70"><a href="#main-70"><span class="linenos">70</span></a>        <span class="n">device</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="main-71"><a href="#main-71"><span class="linenos">71</span></a>        <span class="n">workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="main-72"><a href="#main-72"><span class="linenos">72</span></a>        <span class="n">project</span><span class="o">=</span><span class="s2">"results/training"</span><span class="p">,</span>
+</span><span id="main-73"><a href="#main-73"><span class="linenos">73</span></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"yolo11n_baseline"</span><span class="p">,</span>
+</span><span id="main-74"><a href="#main-74"><span class="linenos">74</span></a>        <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="main-75"><a href="#main-75"><span class="linenos">75</span></a>        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+</span><span id="main-76"><a href="#main-76"><span class="linenos">76</span></a>    <span class="p">)</span>
+</span><span id="main-77"><a href="#main-77"><span class="linenos">77</span></a>
+</span><span id="main-78"><a href="#main-78"><span class="linenos">78</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training completed."</span><span class="p">)</span>
 </span></pre></div>
 
 
