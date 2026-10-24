@@ -16,6 +16,22 @@ On a meat-packing line, packs with poor seals, loose or twisted meat, or packagi
 
 An image with no detections means no defect was found above the confidence threshold. This does not guarantee that the pack is defect-free.
 
+### Invalid or unsupported inputs
+
+These cases were tested with the selected model (`yolo11n_640`):
+
+| Input | What happens |
+|---|---|
+| File does not exist | `FileNotFoundError` |
+| Corrupt or non-image file | Ultralytics prints `Image Read Error`, then fails with an unclear `IndexError`. Check that files open before passing them in. |
+| Greyscale photo of a pack | Works: it is converted to three channels. A test photo's unsealed defect was still found, at 0.74 confidence vs 0.81 in colour. |
+| Blank or random-noise image | No detections |
+| **Photo of something other than a pork pack** | **Wrong detections, with no warning.** Ultralytics' sample photo of a bus produced seven "defects", including twisted-meat at 0.74 confidence. |
+
+The last case is the most important limitation. The model always assumes it is looking at a pork pack, so in use, photos must come from the same camera set-up as the training data.
+
+Training labels are checked separately by `src/validate_annotations.py`. Any label with the wrong number of values, an unknown class, or a box outside the image is rejected with a specific error message.
+
 ## Dataset
 
 [Pork-Rasher-Error(Packaging), version 4](https://universe.roboflow.com/hello-2aqe0/pork-rasher-error-packaging/dataset/4) from Roboflow Universe, licensed under **CC BY 4.0**. It is downloaded in YOLO11 format and is not stored in this repository.
@@ -51,6 +67,7 @@ Each label file holds one box per line as `class_id x_center y_center width heig
 │   ├── final_test/            Evaluation of the selected model on the test split
 │   ├── label_checks/          Sample images with ground-truth boxes drawn
 │   ├── test_reports/          pytest XML and HTML test report
+│   ├── profiles/              PyTorch profiler breakdown for each model
 │   └── *.csv                  Comparison and final test metrics
 ├── docs/                    HTML code documentation (pdoc)
 ├── requirements.txt
@@ -97,7 +114,7 @@ Run every command from the project root.
    python src/train_yolo11s.py
    ```
    Ultralytics saves weights, metrics and plots under `runs/detect/results/training/<experiment>/`.
-4. **Evaluate.** This compares all models on the validation split, measures their speed, memory and FLOPs, then tests the selected model once on the test split. It takes a few minutes and does not retrain anything.
+4. **Evaluate.** This compares all models on the validation split, measures their speed, memory and FLOPs, profiles where the time goes, then tests the selected model once on the test split. It takes a few minutes and does not retrain anything.
    ```bash
    python src/evaluate.py
    ```
@@ -140,16 +157,23 @@ Computational cost (AMD Radeon RX 9070 XT, one image at a time):
 
 | Model | Resolution | Parameters | GFLOPs per image | Inference (ms) | End-to-end (ms) | Peak GPU memory (MB) | Training (h) |
 |---|---|---|---|---|---|---|---|
-| YOLO11n | 480 | 2.6 M | 3.6 | 7.6 | 10.0 | 65 | 0.73 |
-| YOLO11n | 640 | 2.6 M | 6.4 | 7.7 | 10.2 | 94 | 1.15 |
-| YOLO11n | 800 | 2.6 M | 10.1 | 7.4 | 10.5 | 120 | 1.72 |
-| YOLO11s | 640 | 9.4 M | 21.4 | 7.9 | 10.5 | 143 | 1.35 |
+| YOLO11n | 480 | 2.6 M | 3.6 | 7.5 | 10.0 | 32 | 0.73 |
+| YOLO11n | 640 | 2.6 M | 6.4 | 7.6 | 10.3 | 39 | 1.15 |
+| YOLO11n | 800 | 2.6 M | 10.1 | 7.4 | 10.5 | 50 | 1.72 |
+| YOLO11s | 640 | 9.4 M | 21.4 | 7.9 | 10.6 | 109 | 1.35 |
 
-"Inference" is the network forward pass only. "End-to-end" adds image resizing and box post-processing.
+"Inference" is the network forward pass only. "End-to-end" adds image resizing and box post-processing. Peak GPU memory is the extra memory used while checking photos, measured from a clean baseline for each model.
 
 YOLO11n at 640 px was selected. It has the best mAP50, and 800 px gives no mAP50 gain for about 50% more training time. YOLO11s needs 3.3× more computation per image and has a lower mAP50.
 
-The inference time is almost the same (about 7.5 ms) for every model, even though the computation per image varies sixfold. At batch size 1, this GPU is limited by fixed per-call overhead, not by arithmetic: it reaches only 0.5–2.7 TFLOP/s. On this hardware, model size therefore affects memory and training time much more than inspection speed.
+The inference time is almost the same (about 7.5 ms) for every model, even though the computation per image varies sixfold. At batch size 1, this GPU is limited by fixed per-call overhead, not by arithmetic: it reaches only 0.5–2.7 TFLOP/s.
+
+The PyTorch profiler confirms this (`results/profiles/`):
+
+- Every model runs the same 88 convolution layers and about 1,200 PyTorch operations per photo. YOLO11s does more arithmetic inside each operation, not more operations.
+- The processor needs about 7 ms just to prepare and dispatch these operations to the GPU, which is roughly the whole inference time.
+
+On this hardware, model size therefore affects memory and training time much more than inspection speed.
 
 Final evaluation of the selected model on the withheld test split (80 images):
 
@@ -175,3 +199,5 @@ AI tools (Claude Code) were used to help write documentation, tests and reportin
 ## Licence
 
 The code is released under the [MIT Licence](LICENSE). The dataset is licensed separately under CC BY 4.0 by its Roboflow authors.
+
+The project depends on [Ultralytics](https://github.com/ultralytics/ultralytics), which is licensed under **AGPL-3.0**. The MIT licence covers this repository's own code. Anyone who distributes this project together with Ultralytics, or offers it as a network service, must also meet the AGPL-3.0 terms, which include making the full source code available.
