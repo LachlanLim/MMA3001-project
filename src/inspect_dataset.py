@@ -1,15 +1,40 @@
 """
-Inspect the pork-rasher packaging defect dataset.
+Show the defect types and count the photos in each part of the dataset.
 
-This module reads the dataset's data.yaml configuration and
-checks the number of images and YOLO annotation files in the
-training, validation and test splits.
+Run this straight after downloading, as a quick check that the download
+is complete before spending hours on training. Every photo should have
+exactly one label file; a mismatch means files are missing or corrupt.
 
-The inspection helps verify the dataset structure before
-training the YOLO11 object-detection models.
+## Usage
 
 Run from the project root:
-    python src/inspect_dataset.py
+
+```text
+$ python src/inspect_dataset.py
+Dataset configuration:
+{'train': '../train/images', 'val': '../valid/images', 'test': '../test/images',
+ 'nc': 5, 'names': ['loose-meat', 'packaging-error', 'twisted-meat',
+ 'unsealed', 'wrinkle'], 'roboflow': {...}}
+
+Class names:
+['loose-meat', 'packaging-error', 'twisted-meat', 'unsealed', 'wrinkle']
+
+TRAIN
+Images: 3349
+Labels: 3349
+
+VALID
+Images: 120
+Labels: 120
+
+TEST
+Images: 80
+Labels: 80
+```
+
+Here every split has matching image and label counts, so the download
+is complete. The same checks run automatically in
+``tests/test_dataset.py``.
 """
 
 from pathlib import Path

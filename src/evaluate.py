@@ -1,32 +1,110 @@
 """
-Evaluate the trained models and measure their computational cost.
+Measure how well each trained model works, and how much it costs to run.
 
-For each training experiment, this module:
+Training produced four candidate models. This script compares them
+fairly, chooses one, and gives that one a final exam on photos it has
+never been judged on. It does no training itself: it loads each saved
+model (``best.pt``) and checks photos with it, so it finishes in about a
+minute.
 
-1. measures accuracy (precision, recall, mAP50, mAP50-95) on the
-   validation split;
-2. measures model size (parameters) and computation per image (GFLOPs);
-3. times inference on the validation images one at a time, as on an
-   inspection line, and records peak GPU memory;
-4. reads the training time from the Ultralytics results.csv.
+## What is measured, and why
 
-The selected model is then evaluated once on the withheld test split.
+| Measurement | Plain meaning | Why it matters on a packing line |
+|---|---|---|
+| Precision | Of the defects reported, how many were real | Low precision means good packs are wrongly rejected |
+| Recall | Of the real defects, how many were found | Low recall means faulty packs reach customers |
+| mAP50 | Overall accuracy score from 0 to 1 (see the glossary in `src`) | The main score used to choose the model |
+| GFLOPs | Arithmetic needed to check one photo | Whether cheaper hardware could run it |
+| Inference time | Time for the model to check one photo | Whether it keeps up with the line |
+| Peak memory | Graphics-card memory used | Whether it fits on smaller devices |
+| Training time | Hours to train | Cost of retraining when new defect types appear |
 
-All accuracy and timing results come from the trained ``best.pt``
-weights, so no retraining is needed. Run the training scripts first.
+Speed is measured one photo at a time, as on a line where packs arrive
+one by one. Ten photos are checked first as a warm-up (the first few
+are always slow while the graphics card starts up). Then all 120
+validation photos are timed, and the median is reported so a single
+slow photo does not distort it.
 
-Outputs:
-    results/model_comparison.csv:
-        YOLO11n vs YOLO11s at 640 pixels.
-    results/resolution_comparison.csv:
-        YOLO11n at 480, 640 and 800 pixels.
-    results/final_test_metrics.csv:
-        Per-class test-split metrics for the selected model.
-    runs/detect/evaluation/:
-        Ultralytics plots (confusion matrix, PR curves) for each run.
+## Fair testing
 
-Run from the project root:
-    python src/evaluate.py
+The photos are split three ways, like study material, practice exams and
+a final exam:
+
+1. The models **learned** from the 3349 training photos.
+2. The four models are **compared** on the 120 validation photos, and
+   the best is chosen.
+3. Only the chosen model is **tested once** on the 80 test photos.
+
+The test photos are kept back until the choice is made. If they were
+used to choose, the model would be picked partly for luck on those
+particular photos, and its score would overstate how well it works on
+new packs.
+
+## Usage
+
+Run from the project root, after training all four models:
+
+```text
+$ python src/evaluate.py
+GPU: AMD Radeon RX 9070 XT
+
+=== yolo11n_480 ===
+...
+Saved results/model_comparison.csv
+Saved results/resolution_comparison.csv
+
+=== Final test: yolo11n_640 ===
+...
+Saved results/final_test_metrics.csv
+```
+
+## Results
+
+Comparison on the validation photos (AMD Radeon RX 9070 XT):
+
+| Model | Resolution | mAP50 | GFLOPs | Inference (ms) | Memory (MB) | Training (h) |
+|---|---|---|---|---|---|---|
+| YOLO11n | 480 | 0.576 | 3.6 | 7.6 | 65 | 0.73 |
+| **YOLO11n** | **640** | **0.647** | 6.4 | 7.7 | 94 | 1.15 |
+| YOLO11n | 800 | 0.646 | 10.1 | 7.4 | 120 | 1.72 |
+| YOLO11s | 640 | 0.563 | 21.4 | 7.9 | 143 | 1.35 |
+
+YOLO11n at 640 px was chosen: it is the most accurate, and the larger
+options cost more memory and training time for no gain.
+
+Final test of the chosen model (80 unseen photos):
+
+| Defect | Defects in test photos | Precision | Recall | mAP50 |
+|---|---|---|---|---|
+| **all** | 79 | 0.510 | 0.488 | 0.519 |
+| unsealed | 49 | 0.664 | 0.878 | 0.856 |
+| packaging-error | 23 | 0.377 | 0.522 | 0.497 |
+| twisted-meat | 4 | 0.000 | 0.000 | 0.031 |
+| loose-meat | 3 | 1.000 | 0.553 | 0.694 |
+| wrinkle | 0 | - | - | - |
+
+**Reading the results:** the model finds 88% of unsealed packs, the
+most safety-critical defect. It is weak on rare defect types:
+twisted-meat had only 72 training examples, and its single test score
+rests on just 4 boxes, so it is not reliable. Wrinkle cannot be tested
+at all, because the dataset has no wrinkle examples outside the
+training photos.
+
+**A surprising result:** every model takes about the same time per photo
+(7.4 to 7.9 ms), even though the largest needs six times the arithmetic
+of the smallest. When photos are checked one at a time, the graphics
+card spends most of its time on fixed start-up work for each photo, not
+on arithmetic. So on this hardware the model size affects memory and
+training time, not inspection speed.
+
+## Outputs
+
+- ``results/model_comparison.csv``: YOLO11n vs YOLO11s at 640 px
+- ``results/resolution_comparison.csv``: YOLO11n at 480, 640 and 800 px
+- ``results/final_test_metrics.csv``: per-defect test results for the
+  chosen model
+- ``runs/detect/evaluation/``: Ultralytics plots (confusion matrices,
+  precision-recall curves)
 """
 
 import csv

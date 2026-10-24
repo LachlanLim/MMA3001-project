@@ -1,13 +1,30 @@
 """
-Build a readable HTML summary from the pytest JUnit XML report.
+Turn the automated test results into a readable web page.
 
-The report groups results by test module, shows each test's docstring
-as its description and lists why each invalid annotation was rejected.
+pytest can save its results as an XML file, which is complete but hard
+to read. This script turns that file into a single HTML page with:
 
-Run the tests first so the XML exists:
+- a pass/fail summary at the top
+- each test explained in plain English (taken from its docstring)
+- for the invalid-label tests, each bad label and why it was rejected
 
-    pytest tests --junitxml=results/test_reports/all_tests.xml
-    python src/make_test_report.py
+It is the test report that a reviewer opens, at
+``results/test_reports/test_summary.html``.
+
+## Usage
+
+Run the tests first, so the XML file exists, then build the page:
+
+```text
+$ pytest --junitxml=results/test_reports/all_tests.xml
+..................                                         [100%]
+18 passed in 0.37s
+
+$ python src/make_test_report.py
+Saved report to results/test_reports/test_summary.html
+```
+
+Open the HTML file in any web browser.
 """
 
 import ast
@@ -36,6 +53,11 @@ SUITE_TITLES = {
         "Annotation validation",
         "Checks the YOLO label validator against known good and bad "
         "annotations, then runs it over every label file in the dataset.",
+    ),
+    "src.validate_annotations": (
+        "Documentation examples",
+        "Runs the examples written in the code documentation, to prove "
+        "they give the output shown.",
     ),
 }
 
@@ -121,8 +143,13 @@ def load_results():
     for case in suite.iter("testcase"):
         module = case.get("classname")
         full_name = case.get("name")
-        match = re.match(r"(\w+)(?:\[(.*)\])?$", full_name)
+        match = re.match(r"([\w.]+)(?:\[(.*)\])?$", full_name)
         function, param = match.group(1), match.group(2)
+
+        # Doctests are named after the documented function,
+        # e.g. "src.validate_annotations.validate_annotation"
+        is_doctest = "." in function
+        function = function.rsplit(".", 1)[-1]
 
         status, message = "passed", ""
         for tag in ("failure", "error", "skipped"):
@@ -136,8 +163,15 @@ def load_results():
             "module": module,
             "function": function,
             "param": param,
-            "title": humanise(function),
-            "description": docstrings.get(f"{module}.{function}", ""),
+            "title": (
+                f"Examples for {function}()" if is_doctest else humanise(function)
+            ),
+            "description": (
+                "Check that each example in the function's documentation "
+                "gives the result shown."
+                if is_doctest
+                else docstrings.get(f"{module}.{function}", "")
+            ),
             "time": float(case.get("time", 0)),
             "status": status,
             "message": message,

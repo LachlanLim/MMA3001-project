@@ -1,18 +1,49 @@
 """
-Train YOLO11n at 800-pixel input resolution.
+Resolution experiment: train YOLO11 nano on larger, 800-pixel photos.
 
-This module investigates the effect of increasing the input
-resolution from the 640-pixel baseline to 800 pixels.
+**Question:** Does giving the model more detail help it find small
+defects?
 
-The experiment forms part of the resolution sensitivity analysis
-for automated pork-rasher packaging defect detection.
+**Why it matters:** Larger photos keep fine details, such as a thin
+unsealed edge, that may be lost when shrinking to 640 px. The cost is
+about 1.6 times more computation per photo than at 640 px.
 
-The model architecture and main training parameters are kept
-consistent with the 480- and 640-pixel experiments to allow
-comparison of detection performance and computational cost.
+**Result:** No gain: mAP50 was 0.646, against 0.647 at 640 px, while
+training took 50% longer (1.72 vs 1.15 hours) and used 28% more GPU
+memory. The extra detail did not help, so 640 px was kept.
 
-Run from the project root:
-    python src/train_yolo11n_800.py
+## Settings
+
+| Setting | Value | Meaning |
+|---|---|---|
+| Starting model | `yolo11n.pt` | YOLO11 nano (2.6 million parameters), pretrained on everyday photos (COCO) |
+| Resolution | 800 px | Each photo is resized to 800 × 800 before the model sees it |
+| Epochs | 50 | Passes through all 3349 training photos |
+| Batch size | 8 | Photos processed together per update |
+| Seed | 42 | Makes the run repeatable |
+| Device | GPU 0 | The first graphics card |
+
+All four training experiments use these same settings apart from the
+model and resolution, so their results can be compared fairly.
+
+## Usage
+
+Run from the project root, after downloading the data:
+
+```text
+$ python src/train_yolo11n_800.py
+```
+
+Training takes about 1.7 hours on an AMD Radeon RX 9070 XT. Progress is
+printed after every epoch.
+
+Ultralytics saves its outputs to
+``runs/detect/results/training/yolo11n_800/``, including:
+
+- ``weights/best.pt``: the trained model, from the epoch that scored best on the validation photos
+- ``weights/last.pt``: the model after the final epoch
+- ``results.csv`` and ``results.png``: accuracy and loss for every epoch, to check the training settled down
+- ``confusion_matrix.png``: which defect types get mixed up with each other
 """
 
 from pathlib import Path
@@ -24,24 +55,7 @@ DATA_YAML = Path(
 
 
 def main():
-    """
-    Train the YOLO11n model using 800-pixel inputs.
-
-    Loads pretrained YOLO11n weights and fine-tunes the model
-    using the five annotated pork-packaging defect categories.
-
-    Training configuration:
-        Epochs: 50
-        Image size: 800 pixels
-        Batch size: 8
-        Device: GPU 0
-        Workers: 0
-        Random seed: 42
-
-    Model checkpoints, validation metrics, training curves and
-    diagnostic figures are saved by Ultralytics under
-    ``runs/detect/results/training/yolo11n_800``.
-    """
+    """Train the model and save the results (see the module description)."""
     model = YOLO("yolo11n.pt")
 
     model.train(
