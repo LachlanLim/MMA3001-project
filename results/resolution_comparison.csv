@@ -1,4 +1,4 @@
-model,resolution,precision,recall,mAP50,mAP50_95,training_hours
-YOLO11n,480,0.714,0.565,0.576,0.342,
-YOLO11n,640,0.704,0.622,0.647,0.355,1.148
-YOLO11n,800,0.775,0.642,0.646,0.343,1.719
+model,resolution,precision,recall,mAP50,mAP50_95,parameters,gflops,inference_ms,end_to_end_ms,achieved_gflops_per_s,peak_memory_mb,training_hours
+YOLO11n,480,0.714,0.565,0.576,0.342,2598023,3.6,7.58,9.98,476,65,0.73
+YOLO11n,640,0.705,0.622,0.647,0.355,2598023,6.4,7.67,10.24,840,94,1.148
+YOLO11n,800,0.775,0.642,0.646,0.343,2598023,10.1,7.38,10.46,1372,120,1.719
