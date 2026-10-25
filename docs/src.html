@@ -57,6 +57,7 @@
                     <li><a href="src/evaluate.html">evaluate</a></li>
                     <li><a href="src/inspect_dataset.html">inspect_dataset</a></li>
                     <li><a href="src/make_test_report.html">make_test_report</a></li>
+                    <li><a href="src/operating_point.html">operating_point</a></li>
                     <li><a href="src/resume_yolo11s.html">resume_yolo11s</a></li>
                     <li><a href="src/train_yolo11n.html">train_yolo11n</a></li>
                     <li><a href="src/train_yolo11n_480.html">train_yolo11n_480</a></li>
@@ -294,8 +295,8 @@ copes with a different production line.</li>
 </tr>
 <tr>
   <td>Confidence threshold</td>
-  <td>0.25</td>
-  <td>Ultralytics default; should be tuned to the line's needs</td>
+  <td>0.15</td>
+  <td>Highest threshold that rejects at least 95% of defective packs on the validation photos (see <code><a href="src/operating_point.html">src.operating_point</a></code>)</td>
 </tr>
 </tbody>
 </table>
@@ -326,9 +327,12 @@ photos.</li>
 <li><strong>No warning for unusual photos.</strong> The model will still make confident
 predictions on unfamiliar photos (another product, a different
 camera), and cannot flag them as unusual.</li>
-<li><strong>No pass/fail target was set.</strong> A real deployment would agree one
-with the plant (for example, "find at least 95% of unsealed packs")
-and tune the confidence threshold to meet it.</li>
+<li><strong>The pass/fail target was only nearly met.</strong> The threshold was chosen
+to reject at least 95% of defective packs on the validation photos. On
+the unseen test photos it rejected 92.6% (63 of 68), and wrongly
+rejected 3 of the 12 good packs. A real plant would set its own target.</li>
+<li><strong>The test score is uncertain.</strong> With only 80 test photos, the 95%
+confidence interval for mAP50 runs from 0.41 to 0.67.</li>
 </ul>
 
 <h2 id="workflow">Workflow</h2>
@@ -342,6 +346,7 @@ and tune the confidence threshold to meet it.</li>
     C --&gt; D[visualise_labels]
     D --&gt; E[train_yolo11n&lt;br/&gt;train_yolo11n_480&lt;br/&gt;train_yolo11n_800&lt;br/&gt;train_yolo11s]
     E --&gt; F[evaluate]
+    F --&gt; G[operating_point]
 </div></pre>
 
 <h2 id="modules">Modules</h2>
@@ -371,6 +376,9 @@ them by eye</li>
 <ul>
 <li><code><a href="src/evaluate.html">src.evaluate</a></code>: compare accuracy, speed and memory use, then give the
 chosen model its final test</li>
+<li><code><a href="src/operating_point.html">src.operating_point</a></code>: choose the confidence threshold for use on a
+line, put error bars on the test score, and test whether batching
+photos removes the speed limit</li>
 <li><code><a href="src/make_test_report.html">src.make_test_report</a></code>: turn the automated test results into a
 readable web page</li>
 </ul>
@@ -592,7 +600,7 @@ photos; <code>last.pt</code> is from the final epoch.</li>
 </span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">| Batch size | 8 (accumulated to 64) | Fits in GPU memory at every resolution |</span>
 </span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">| Optimiser | AdamW, learning rate 0.001111 | Chosen automatically by Ultralytics for short training runs |</span>
 </span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">| Augmentation | Mosaic, colour jitter, flips, shifts, scaling | Teaches the model to ignore position and lighting changes |</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">| Confidence threshold | 0.25 | Ultralytics default; should be tuned to the line's needs |</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">| Confidence threshold | 0.15 | Highest threshold that rejects at least 95% of defective packs on the validation photos (see `src.operating_point`) |</span>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>
 </span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">Augmentation randomly alters each training photo every epoch. **Mosaic**</span>
 </span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">stitches four photos into one; **colour jitter** varies hue, saturation</span>
@@ -619,110 +627,117 @@ photos; <code>last.pt</code> is from the final epoch.</li>
 </span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a><span class="sd">- **No warning for unusual photos.** The model will still make confident</span>
 </span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a><span class="sd">  predictions on unfamiliar photos (another product, a different</span>
 </span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">  camera), and cannot flag them as unusual.</span>
-</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">- **No pass/fail target was set.** A real deployment would agree one</span>
-</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">  with the plant (for example, "find at least 95% of unsealed packs")</span>
-</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">  and tune the confidence threshold to meet it.</span>
-</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">## Workflow</span>
-</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>
-</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">Each module is a script, run from the project root with</span>
-</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a><span class="sd">`python src/&lt;module&gt;.py`, in this order:</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">- **The pass/fail target was only nearly met.** The threshold was chosen</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">  to reject at least 95% of defective packs on the validation photos. On</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">  the unseen test photos it rejected 92.6% (63 of 68), and wrongly</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">  rejected 3 of the 12 good packs. A real plant would set its own target.</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">- **The test score is uncertain.** With only 80 test photos, the 95%</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">  confidence interval for mAP50 runs from 0.41 to 0.67.</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a><span class="sd">## Workflow</span>
 </span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>
-</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="sd">```mermaid</span>
-</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a><span class="sd">flowchart LR</span>
-</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a><span class="sd">    A[download_data] --&gt; B[inspect_dataset]</span>
-</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a><span class="sd">    B --&gt; C[validate_annotations]</span>
-</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a><span class="sd">    C --&gt; D[visualise_labels]</span>
-</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a><span class="sd">    D --&gt; E[train_yolo11n&lt;br/&gt;train_yolo11n_480&lt;br/&gt;train_yolo11n_800&lt;br/&gt;train_yolo11s]</span>
-</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a><span class="sd">    E --&gt; F[evaluate]</span>
-</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a><span class="sd">```</span>
-</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>
-</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a><span class="sd">## Modules</span>
-</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a>
-</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="sd">**1. Data preparation:** get the photos and check the labels are correct</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="sd">Each module is a script, run from the project root with</span>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a><span class="sd">`python src/&lt;module&gt;.py`, in this order:</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a><span class="sd">```mermaid</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a><span class="sd">flowchart LR</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a><span class="sd">    A[download_data] --&gt; B[inspect_dataset]</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a><span class="sd">    B --&gt; C[validate_annotations]</span>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a><span class="sd">    C --&gt; D[visualise_labels]</span>
+</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a><span class="sd">    D --&gt; E[train_yolo11n&lt;br/&gt;train_yolo11n_480&lt;br/&gt;train_yolo11n_800&lt;br/&gt;train_yolo11s]</span>
+</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a><span class="sd">    E --&gt; F[evaluate]</span>
+</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a><span class="sd">    F --&gt; G[operating_point]</span>
+</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="sd">```</span>
 </span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a>
-</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="sd">- `src.download_data`: download the dataset from Roboflow</span>
-</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a><span class="sd">- `src.inspect_dataset`: show the defect types and count the photos</span>
-</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a><span class="sd">- `src.validate_annotations`: check every label for mistakes</span>
-</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a><span class="sd">- `src.visualise_labels`: draw the labelled boxes on photos to check</span>
-</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="sd">  them by eye</span>
-</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a>
-</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">**2. Training experiments:** teach the model, testing which settings work best</span>
-</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>
-</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="sd">- `src.train_yolo11n`: the baseline (small model, 640-pixel photos)</span>
-</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a><span class="sd">- `src.train_yolo11n_480`: does a lower resolution lose accuracy?</span>
-</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">- `src.train_yolo11n_800`: does a higher resolution gain accuracy?</span>
-</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a><span class="sd">- `src.train_yolo11s`: does a larger model do better?</span>
-</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">- `src.resume_yolo11s`: continue a training run that was interrupted</span>
-</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a>
-</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="sd">**3. Evaluation and reporting:** measure how well it works</span>
-</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a>
-</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="sd">- `src.evaluate`: compare accuracy, speed and memory use, then give the</span>
-</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="sd">  chosen model its final test</span>
-</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="sd">- `src.make_test_report`: turn the automated test results into a</span>
-</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="sd">  readable web page</span>
-</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>
-</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">## Glossary</span>
-</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a>
-</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="sd">- **Bounding box**: The rectangle drawn around a defect, given by its</span>
-</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">  corner positions (x1, y1, x2, y2) in pixels.</span>
-</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">- **YOLO label format**: How the true boxes are stored: one line per</span>
-</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">  defect, `class_id x_center y_center width height`. The four numbers</span>
-</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">  are fractions of the image size (0 to 1), so `0.5` means halfway</span>
-</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">  across.</span>
-</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">- **Class**: A defect type. Each has a number: 0 `loose-meat`, 1</span>
-</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">  `packaging-error`, 2 `twisted-meat`, 3 `unsealed`, 4 `wrinkle`.</span>
-</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="sd">- **Confidence**: How sure the model is about a detection, from 0 to 1.</span>
-</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">  Detections below a chosen threshold (`conf`) are thrown away.</span>
-</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">- **Training / validation / test split**: The photos are divided three</span>
-</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">  ways. The model *learns* from the training photos (3349), settings are</span>
-</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">  *chosen* using the validation photos (120), and the final model is</span>
-</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">  *checked once* on the test photos (80) it has never been used with,</span>
-</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">  like a final exam.</span>
-</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">- **Epoch**: One full pass through all the training photos. Each model</span>
-</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">  here was trained for 50 epochs.</span>
-</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a><span class="sd">- **Batch size**: How many photos the model looks at together before</span>
-</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a><span class="sd">  updating itself (8).</span>
-</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="sd">- **Pretrained weights**: A model that has already learned general</span>
-</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="sd">  shapes and textures from a large public photo collection (COCO).</span>
-</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a><span class="sd">  Starting from these means far fewer pork-pack photos are needed than</span>
-</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a><span class="sd">  training from scratch.</span>
-</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">- **Seed**: A fixed starting number for the random choices made during</span>
-</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">  training (42), so a run can be repeated.</span>
-</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">- **Resolution (imgsz)**: The size, in pixels, that each photo is</span>
-</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">  resized to before the model sees it. Bigger shows more detail but</span>
-</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">  needs more computation.</span>
-</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">- **IoU (intersection over union)**: How much a predicted box overlaps</span>
-</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="sd">  the true box, from 0 (no overlap) to 1 (perfect match).</span>
-</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">- **Precision**: Of the defects the model reported, the fraction that</span>
-</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">  were real. Low precision means many false alarms.</span>
-</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="sd">- **Recall**: Of the real defects, the fraction the model found. Low</span>
-</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="sd">  recall means missed defects.</span>
-</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">- **mAP50**: The main accuracy score, from 0 to 1. It combines precision</span>
-</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">  and recall across all confidence levels, averaged over the defect</span>
-</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a><span class="sd">  types, counting a detection as correct if its IoU with the true box is</span>
-</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="sd">  at least 0.5.</span>
-</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a><span class="sd">- **mAP50-95**: A stricter version of mAP50 that also rewards boxes</span>
-</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a><span class="sd">  drawn tightly around the defect (IoU thresholds from 0.5 up to 0.95).</span>
-</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a><span class="sd">- **Loss function**: A single number measuring how wrong the model's</span>
-</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="sd">  predictions are. Training works by making it smaller.</span>
-</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="sd">- **Gradient descent**: Repeatedly nudging every weight in the</span>
-</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">  direction that lowers the loss. The **learning rate** sets the step</span>
-</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">  size.</span>
-</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">- **Over-fitting**: When a model memorises its training photos instead</span>
-</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">  of learning general rules, so it does worse on new photos.</span>
-</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">- **Augmentation**: Randomly altering training photos (flips, colour</span>
-</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">  changes and so on) so the model learns from more variety.</span>
-</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">- **Inference**: Using the trained model to check a photo, as opposed to</span>
-</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">  training it.</span>
-</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">- **GFLOPs**: Billions of arithmetic operations the model needs to check</span>
-</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">  one photo, a hardware-independent measure of how much work it does.</span>
-</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">- **Checkpoint (`best.pt`, `last.pt`)**: Saved copies of the model.</span>
-</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">  `best.pt` is from the epoch that scored highest on the validation</span>
-</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">  photos; `last.pt` is from the final epoch.</span>
-</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a>
-</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">See the project README for setup instructions.</span>
-</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">"""</span>
+</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="sd">## Modules</span>
+</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a><span class="sd">**1. Data preparation:** get the photos and check the labels are correct</span>
+</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>
+</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="sd">- `src.download_data`: download the dataset from Roboflow</span>
+</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a><span class="sd">- `src.inspect_dataset`: show the defect types and count the photos</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">- `src.validate_annotations`: check every label for mistakes</span>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="sd">- `src.visualise_labels`: draw the labelled boxes on photos to check</span>
+</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="sd">  them by eye</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">**2. Training experiments:** teach the model, testing which settings work best</span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">- `src.train_yolo11n`: the baseline (small model, 640-pixel photos)</span>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="sd">- `src.train_yolo11n_480`: does a lower resolution lose accuracy?</span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="sd">- `src.train_yolo11n_800`: does a higher resolution gain accuracy?</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="sd">- `src.train_yolo11s`: does a larger model do better?</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="sd">- `src.resume_yolo11s`: continue a training run that was interrupted</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="sd">**3. Evaluation and reporting:** measure how well it works</span>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a><span class="sd">- `src.evaluate`: compare accuracy, speed and memory use, then give the</span>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">  chosen model its final test</span>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="sd">- `src.operating_point`: choose the confidence threshold for use on a</span>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="sd">  line, put error bars on the test score, and test whether batching</span>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">  photos removes the speed limit</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">- `src.make_test_report`: turn the automated test results into a</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">  readable web page</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">## Glossary</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">- **Bounding box**: The rectangle drawn around a defect, given by its</span>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="sd">  corner positions (x1, y1, x2, y2) in pixels.</span>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">- **YOLO label format**: How the true boxes are stored: one line per</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">  defect, `class_id x_center y_center width height`. The four numbers</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">  are fractions of the image size (0 to 1), so `0.5` means halfway</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">  across.</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">- **Class**: A defect type. Each has a number: 0 `loose-meat`, 1</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">  `packaging-error`, 2 `twisted-meat`, 3 `unsealed`, 4 `wrinkle`.</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">- **Confidence**: How sure the model is about a detection, from 0 to 1.</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">  Detections below a chosen threshold (`conf`) are thrown away.</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a><span class="sd">- **Training / validation / test split**: The photos are divided three</span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a><span class="sd">  ways. The model *learns* from the training photos (3349), settings are</span>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="sd">  *chosen* using the validation photos (120), and the final model is</span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="sd">  *checked once* on the test photos (80) it has never been used with,</span>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a><span class="sd">  like a final exam.</span>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a><span class="sd">- **Epoch**: One full pass through all the training photos. Each model</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">  here was trained for 50 epochs.</span>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">- **Batch size**: How many photos the model looks at together before</span>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">  updating itself (8).</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">- **Pretrained weights**: A model that has already learned general</span>
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">  shapes and textures from a large public photo collection (COCO).</span>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">  Starting from these means far fewer pork-pack photos are needed than</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="sd">  training from scratch.</span>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">- **Seed**: A fixed starting number for the random choices made during</span>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">  training (42), so a run can be repeated.</span>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="sd">- **Resolution (imgsz)**: The size, in pixels, that each photo is</span>
+</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="sd">  resized to before the model sees it. Bigger shows more detail but</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">  needs more computation.</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">- **IoU (intersection over union)**: How much a predicted box overlaps</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a><span class="sd">  the true box, from 0 (no overlap) to 1 (perfect match).</span>
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="sd">- **Precision**: Of the defects the model reported, the fraction that</span>
+</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a><span class="sd">  were real. Low precision means many false alarms.</span>
+</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a><span class="sd">- **Recall**: Of the real defects, the fraction the model found. Low</span>
+</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a><span class="sd">  recall means missed defects.</span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="sd">- **mAP50**: The main accuracy score, from 0 to 1. It combines precision</span>
+</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="sd">  and recall across all confidence levels, averaged over the defect</span>
+</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">  types, counting a detection as correct if its IoU with the true box is</span>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">  at least 0.5.</span>
+</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">- **mAP50-95**: A stricter version of mAP50 that also rewards boxes</span>
+</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">  drawn tightly around the defect (IoU thresholds from 0.5 up to 0.95).</span>
+</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">- **Loss function**: A single number measuring how wrong the model's</span>
+</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">  predictions are. Training works by making it smaller.</span>
+</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">- **Gradient descent**: Repeatedly nudging every weight in the</span>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">  direction that lowers the loss. The **learning rate** sets the step</span>
+</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">  size.</span>
+</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">- **Over-fitting**: When a model memorises its training photos instead</span>
+</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">  of learning general rules, so it does worse on new photos.</span>
+</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">- **Augmentation**: Randomly altering training photos (flips, colour</span>
+</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">  changes and so on) so the model learns from more variety.</span>
+</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">- **Inference**: Using the trained model to check a photo, as opposed to</span>
+</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">  training it.</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">- **GFLOPs**: Billions of arithmetic operations the model needs to check</span>
+</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a><span class="sd">  one photo, a hardware-independent measure of how much work it does.</span>
+</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a><span class="sd">- **Checkpoint (`best.pt`, `last.pt`)**: Saved copies of the model.</span>
+</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">  `best.pt` is from the epoch that scored highest on the validation</span>
+</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a><span class="sd">  photos; `last.pt` is from the final epoch.</span>
+</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a>
+</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a><span class="sd">See the project README for setup instructions.</span>
+</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a><span class="sd">"""</span>
 </span></pre></div>
 
 

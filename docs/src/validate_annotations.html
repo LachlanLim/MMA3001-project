@@ -252,43 +252,42 @@ The same checks also run automatically in the test suite
 </span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        ```python</span>
 </span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        problems = find_invalid_annotations()</span>
 </span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">        if problems:</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">            print("</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">".join(problems))</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">        ```</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">        A problem message looks like:</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">        ```text</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">        ```</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">    """</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>                <span class="k">try</span><span class="p">:</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="k">return</span> <span class="n">problems</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">            print("\\n".join(problems))</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">        ```</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">        A problem message looks like:</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">        ```text</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">        ```</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">    """</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>                <span class="k">try</span><span class="p">:</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="k">return</span> <span class="n">problems</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>
 </span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>
 </span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>    <span class="n">main</span><span class="p">()</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -490,66 +489,66 @@ with non-positive size or that extends outside the image.</li>
 </span><span id="find_invalid_annotations-131"><a href="#find_invalid_annotations-131"><span class="linenos">131</span></a><span class="sd">        ```python</span>
 </span><span id="find_invalid_annotations-132"><a href="#find_invalid_annotations-132"><span class="linenos">132</span></a><span class="sd">        problems = find_invalid_annotations()</span>
 </span><span id="find_invalid_annotations-133"><a href="#find_invalid_annotations-133"><span class="linenos">133</span></a><span class="sd">        if problems:</span>
-</span><span id="find_invalid_annotations-134"><a href="#find_invalid_annotations-134"><span class="linenos">134</span></a><span class="sd">            print("</span>
-</span><span id="find_invalid_annotations-135"><a href="#find_invalid_annotations-135"><span class="linenos">135</span></a><span class="sd">".join(problems))</span>
-</span><span id="find_invalid_annotations-136"><a href="#find_invalid_annotations-136"><span class="linenos">136</span></a><span class="sd">        ```</span>
-</span><span id="find_invalid_annotations-137"><a href="#find_invalid_annotations-137"><span class="linenos">137</span></a>
-</span><span id="find_invalid_annotations-138"><a href="#find_invalid_annotations-138"><span class="linenos">138</span></a><span class="sd">        A problem message looks like:</span>
-</span><span id="find_invalid_annotations-139"><a href="#find_invalid_annotations-139"><span class="linenos">139</span></a>
-</span><span id="find_invalid_annotations-140"><a href="#find_invalid_annotations-140"><span class="linenos">140</span></a><span class="sd">        ```text</span>
-</span><span id="find_invalid_annotations-141"><a href="#find_invalid_annotations-141"><span class="linenos">141</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
-</span><span id="find_invalid_annotations-142"><a href="#find_invalid_annotations-142"><span class="linenos">142</span></a><span class="sd">        ```</span>
-</span><span id="find_invalid_annotations-143"><a href="#find_invalid_annotations-143"><span class="linenos">143</span></a><span class="sd">    """</span>
-</span><span id="find_invalid_annotations-144"><a href="#find_invalid_annotations-144"><span class="linenos">144</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="find_invalid_annotations-145"><a href="#find_invalid_annotations-145"><span class="linenos">145</span></a>
-</span><span id="find_invalid_annotations-146"><a href="#find_invalid_annotations-146"><span class="linenos">146</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
-</span><span id="find_invalid_annotations-147"><a href="#find_invalid_annotations-147"><span class="linenos">147</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
-</span><span id="find_invalid_annotations-148"><a href="#find_invalid_annotations-148"><span class="linenos">148</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span id="find_invalid_annotations-149"><a href="#find_invalid_annotations-149"><span class="linenos">149</span></a>
-</span><span id="find_invalid_annotations-150"><a href="#find_invalid_annotations-150"><span class="linenos">150</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-</span><span id="find_invalid_annotations-151"><a href="#find_invalid_annotations-151"><span class="linenos">151</span></a>                <span class="k">try</span><span class="p">:</span>
-</span><span id="find_invalid_annotations-152"><a href="#find_invalid_annotations-152"><span class="linenos">152</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span id="find_invalid_annotations-153"><a href="#find_invalid_annotations-153"><span class="linenos">153</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="find_invalid_annotations-154"><a href="#find_invalid_annotations-154"><span class="linenos">154</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="find_invalid_annotations-155"><a href="#find_invalid_annotations-155"><span class="linenos">155</span></a>
-</span><span id="find_invalid_annotations-156"><a href="#find_invalid_annotations-156"><span class="linenos">156</span></a>    <span class="k">return</span> <span class="n">problems</span>
+</span><span id="find_invalid_annotations-134"><a href="#find_invalid_annotations-134"><span class="linenos">134</span></a><span class="sd">            print("\\n".join(problems))</span>
+</span><span id="find_invalid_annotations-135"><a href="#find_invalid_annotations-135"><span class="linenos">135</span></a><span class="sd">        ```</span>
+</span><span id="find_invalid_annotations-136"><a href="#find_invalid_annotations-136"><span class="linenos">136</span></a>
+</span><span id="find_invalid_annotations-137"><a href="#find_invalid_annotations-137"><span class="linenos">137</span></a><span class="sd">        A problem message looks like:</span>
+</span><span id="find_invalid_annotations-138"><a href="#find_invalid_annotations-138"><span class="linenos">138</span></a>
+</span><span id="find_invalid_annotations-139"><a href="#find_invalid_annotations-139"><span class="linenos">139</span></a><span class="sd">        ```text</span>
+</span><span id="find_invalid_annotations-140"><a href="#find_invalid_annotations-140"><span class="linenos">140</span></a><span class="sd">        data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.</span>
+</span><span id="find_invalid_annotations-141"><a href="#find_invalid_annotations-141"><span class="linenos">141</span></a><span class="sd">        ```</span>
+</span><span id="find_invalid_annotations-142"><a href="#find_invalid_annotations-142"><span class="linenos">142</span></a><span class="sd">    """</span>
+</span><span id="find_invalid_annotations-143"><a href="#find_invalid_annotations-143"><span class="linenos">143</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="find_invalid_annotations-144"><a href="#find_invalid_annotations-144"><span class="linenos">144</span></a>
+</span><span id="find_invalid_annotations-145"><a href="#find_invalid_annotations-145"><span class="linenos">145</span></a>    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">):</span>
+</span><span id="find_invalid_annotations-146"><a href="#find_invalid_annotations-146"><span class="linenos">146</span></a>        <span class="k">for</span> <span class="n">label_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">split</span> <span class="o">/</span> <span class="s2">"labels"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)):</span>
+</span><span id="find_invalid_annotations-147"><a href="#find_invalid_annotations-147"><span class="linenos">147</span></a>            <span class="n">lines</span> <span class="o">=</span> <span class="n">label_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span id="find_invalid_annotations-148"><a href="#find_invalid_annotations-148"><span class="linenos">148</span></a>
+</span><span id="find_invalid_annotations-149"><a href="#find_invalid_annotations-149"><span class="linenos">149</span></a>            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="find_invalid_annotations-150"><a href="#find_invalid_annotations-150"><span class="linenos">150</span></a>                <span class="k">try</span><span class="p">:</span>
+</span><span id="find_invalid_annotations-151"><a href="#find_invalid_annotations-151"><span class="linenos">151</span></a>                    <span class="n">validate_annotation</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="find_invalid_annotations-152"><a href="#find_invalid_annotations-152"><span class="linenos">152</span></a>                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="find_invalid_annotations-153"><a href="#find_invalid_annotations-153"><span class="linenos">153</span></a>                    <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label_path</span><span class="si">}</span><span class="s2">, line </span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="find_invalid_annotations-154"><a href="#find_invalid_annotations-154"><span class="linenos">154</span></a>
+</span><span id="find_invalid_annotations-155"><a href="#find_invalid_annotations-155"><span class="linenos">155</span></a>    <span class="k">return</span> <span class="n">problems</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Check every label file in the train, valid and test splits.</p>
 
-<pre><code>Empty label files are allowed, since they represent images with no
-defects.
+<p>Empty label files are allowed, since they represent images with no
+defects.</p>
 
-Args:
-    dataset_dir (Path): Root folder of the downloaded dataset.
+<h6 id="arguments">Arguments:</h6>
 
-Returns:
-    list[str]: One message per invalid line, giving the file, line
-    number and reason. The list is empty if every annotation is valid.
+<ul>
+<li><strong>dataset_dir (Path):</strong>  Root folder of the downloaded dataset.</li>
+</ul>
 
-Example:
+<h6 id="returns">Returns:</h6>
 
+<blockquote>
+  <p>list[str]: One message per invalid line, giving the file, line
+  number and reason. The list is empty if every annotation is valid.</p>
+</blockquote>
 
-    <div class="pdoc-code codehilite">
-<pre><span></span><code>        <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">problems</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span>
-<span class="s2">".join(problems))</span>
+<h6 id="example">Example:</h6>
+
+<blockquote>
+  <div class="pdoc-code codehilite">
+<pre><span></span><code><span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">problems</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">problems</span><span class="p">))</span>
 </code></pre>
-</div>
-
-
-
-    A problem message looks like:
-
-
-
-    <div class="pdoc-code codehilite">
+  </div>
+  
+  <p>A problem message looks like:</p>
+  
+  <div class="pdoc-code codehilite">
 <pre><span></span><code>data/.../train/labels/frame_12.txt, line 2: Class ID must be between 0 and 4.
 </code></pre>
-</div>
-</code></pre>
+  </div>
+</blockquote>
 </div>
 
 
@@ -565,14 +564,14 @@ Example:
 
     </div>
     <a class="headerlink" href="#main"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="main-159"><a href="#main-159"><span class="linenos">159</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="main-160"><a href="#main-160"><span class="linenos">160</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
-</span><span id="main-161"><a href="#main-161"><span class="linenos">161</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
-</span><span id="main-162"><a href="#main-162"><span class="linenos">162</span></a>
-</span><span id="main-163"><a href="#main-163"><span class="linenos">163</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
-</span><span id="main-164"><a href="#main-164"><span class="linenos">164</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
-</span><span id="main-165"><a href="#main-165"><span class="linenos">165</span></a>
-</span><span id="main-166"><a href="#main-166"><span class="linenos">166</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="main-158"><a href="#main-158"><span class="linenos">158</span></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="main-159"><a href="#main-159"><span class="linenos">159</span></a><span class="w">    </span><span class="sd">"""Print any invalid annotations found in the dataset."""</span>
+</span><span id="main-160"><a href="#main-160"><span class="linenos">160</span></a>    <span class="n">problems</span> <span class="o">=</span> <span class="n">find_invalid_annotations</span><span class="p">()</span>
+</span><span id="main-161"><a href="#main-161"><span class="linenos">161</span></a>
+</span><span id="main-162"><a href="#main-162"><span class="linenos">162</span></a>    <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">problems</span><span class="p">:</span>
+</span><span id="main-163"><a href="#main-163"><span class="linenos">163</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+</span><span id="main-164"><a href="#main-164"><span class="linenos">164</span></a>
+</span><span id="main-165"><a href="#main-165"><span class="linenos">165</span></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span><span class="si">}</span><span class="s2"> invalid annotation(s) found."</span><span class="p">)</span>
 </span></pre></div>
 
 
