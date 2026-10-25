@@ -147,7 +147,7 @@ adapts the step size for each weight separately. Its settings were:
 | Batch size | 8 (accumulated to 64) | Fits in GPU memory at every resolution |
 | Optimiser | AdamW, learning rate 0.001111 | Chosen automatically by Ultralytics for short training runs |
 | Augmentation | Mosaic, colour jitter, flips, shifts, scaling | Teaches the model to ignore position and lighting changes |
-| Confidence threshold | 0.25 | Ultralytics default; should be tuned to the line's needs |
+| Confidence threshold | 0.15 | Highest threshold that rejects at least 95% of defective packs on the validation photos (see `src.operating_point`) |
 
 Augmentation randomly alters each training photo every epoch. **Mosaic**
 stitches four photos into one; **colour jitter** varies hue, saturation
@@ -174,9 +174,12 @@ experiment script changes only one setting from the baseline, and
 - **No warning for unusual photos.** The model will still make confident
   predictions on unfamiliar photos (another product, a different
   camera), and cannot flag them as unusual.
-- **No pass/fail target was set.** A real deployment would agree one
-  with the plant (for example, "find at least 95% of unsealed packs")
-  and tune the confidence threshold to meet it.
+- **The pass/fail target was only nearly met.** The threshold was chosen
+  to reject at least 95% of defective packs on the validation photos. On
+  the unseen test photos it rejected 92.6% (63 of 68), and wrongly
+  rejected 3 of the 12 good packs. A real plant would set its own target.
+- **The test score is uncertain.** With only 80 test photos, the 95%
+  confidence interval for mAP50 runs from 0.41 to 0.67.
 
 ## Workflow
 
@@ -190,6 +193,7 @@ flowchart LR
     C --> D[visualise_labels]
     D --> E[train_yolo11n<br/>train_yolo11n_480<br/>train_yolo11n_800<br/>train_yolo11s]
     E --> F[evaluate]
+    F --> G[operating_point]
 ```
 
 ## Modules
@@ -214,6 +218,9 @@ flowchart LR
 
 - `src.evaluate`: compare accuracy, speed and memory use, then give the
   chosen model its final test
+- `src.operating_point`: choose the confidence threshold for use on a
+  line, put error bars on the test score, and test whether batching
+  photos removes the speed limit
 - `src.make_test_report`: turn the automated test results into a
   readable web page
 

@@ -1,0 +1,66 @@
+{
+  "target_pack_recall": 0.95,
+  "chosen_threshold": 0.15,
+  "valid_at_chosen": {
+    "split": "valid",
+    "threshold": 0.15,
+    "box_precision": 0.605,
+    "box_recall": 0.785,
+    "false_detections_per_photo": 0.52,
+    "pack_recall": 0.962,
+    "false_reject_rate": 0.286,
+    "unsealed_recall": 0.938,
+    "defective_packs": 106,
+    "good_packs": 14
+  },
+  "test_at_chosen": {
+    "threshold": 0.15,
+    "box_precision": 0.559,
+    "box_recall": 0.722,
+    "false_detections_per_photo": 0.56,
+    "pack_recall": 0.926,
+    "false_reject_rate": 0.25,
+    "unsealed_recall": 0.898,
+    "defective_packs": 68,
+    "good_packs": 12
+  },
+  "test_at_0.25": {
+    "threshold": 0.25,
+    "box_precision": 0.671,
+    "box_recall": 0.671,
+    "false_detections_per_photo": 0.33,
+    "pack_recall": 0.882,
+    "false_reject_rate": 0.167,
+    "unsealed_recall": 0.857,
+    "defective_packs": 68,
+    "good_packs": 12
+  },
+  "valid_map50_recomputed": 0.625,
+  "test_map50_recomputed": 0.504,
+  "test_map50_95ci": [
+    0.408,
+    0.673
+  ],
+  "test_false_detections_at_0.25": 26,
+  "confusion_matrix_threshold_code": [
+    "DetectionValidator: self.confusion_matrix.process_batch(predn, pbatch, conf=self.args.conf)",
+    "BaseValidator: self.args.conf = 0.01 if self.args.task == \"obb\" else 0.001  # reduce OBB val memory usage"
+  ],
+  "batch_timing": [
+    {
+      "batch_size": 1,
+      "ms_per_photo": 7.48,
+      "photos_per_second": 134
+    },
+    {
+      "batch_size": 8,
+      "ms_per_photo": 1.09,
+      "photos_per_second": 915
+    },
+    {
+      "batch_size": 32,
+      "ms_per_photo": 1.12,
+      "photos_per_second": 891
+    }
+  ]
+}

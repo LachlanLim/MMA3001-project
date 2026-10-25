@@ -1,0 +1,4 @@
+batch_size,ms_per_photo,photos_per_second
+1,7.48,134
+8,1.09,915
+32,1.12,891

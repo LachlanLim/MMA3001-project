@@ -130,8 +130,7 @@ def find_invalid_annotations(dataset_dir=DATASET_DIR):
         ```python
         problems = find_invalid_annotations()
         if problems:
-            print("
-".join(problems))
+            print("\\n".join(problems))
         ```
 
         A problem message looks like:
