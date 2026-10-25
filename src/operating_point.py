@@ -54,7 +54,7 @@ from ultralytics.models.yolo.detect.val import DetectionValidator
 DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
 """Folder holding the downloaded dataset."""
 
-WEIGHTS = Path("runs/detect/results/training/yolo11n_baseline/weights/best.pt")
+WEIGHTS = Path("models/yolo11n_640.pt")
 """Trained weights of the selected model (YOLO11n at 640 px)."""
 
 RESULTS_DIR = Path("results")
