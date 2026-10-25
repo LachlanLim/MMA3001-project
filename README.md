@@ -2,6 +2,8 @@
 
 MMA3001 (Numerical Methods and Machine Learning) individual project, by Lachlan Lim.
 
+**GitHub repository:** <https://github.com/LachlanLim/MMA3001-project>
+
 This project trains YOLO11 object-detection models to find packaging and product defects in RGB images of frozen pork-rasher packs. It compares model sizes and input resolutions to choose a suitable detector for automated inspection.
 
 ## Engineering problem
