@@ -67,3 +67,21 @@ def test_dataset_has_images():
         ]
 
         assert len(images) > 0, f"No images in {split} split."
+
+
+def test_every_image_has_a_label_file():
+    """Check that every photo in each split has a matching label file."""
+    extensions = {".jpg", ".jpeg", ".png"}
+
+    for split in ("train", "valid", "test"):
+        image_dir = DATASET_DIR / split / "images"
+        label_dir = DATASET_DIR / split / "labels"
+
+        missing = [
+            path.name
+            for path in image_dir.iterdir()
+            if path.suffix.lower() in extensions
+            and not (label_dir / f"{path.stem}.txt").is_file()
+        ]
+
+        assert not missing, f"{len(missing)} {split} images have no label file."
