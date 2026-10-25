@@ -223,3 +223,5 @@ data/
 __pycache__/
 runs/
 *.pt
+# Final trained models are kept so the project runs without retraining
+!models/*.pt

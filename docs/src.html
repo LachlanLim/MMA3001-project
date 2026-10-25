@@ -131,7 +131,7 @@ defect types it saw few examples of (see <code><a href="src/evaluate.html">src.e
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">ultralytics</span><span class="w"> </span><span class="kn">import</span> <span class="n">YOLO</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"runs/detect/results/training/yolo11n_baseline/weights/best.pt"</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">YOLO</span><span class="p">(</span><span class="s2">"models/yolo11n_640.pt"</span><span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">"pack.jpg"</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">boxes</span><span class="p">:</span>
@@ -484,7 +484,7 @@ photos; <code>last.pt</code> is from the final epoch.</li>
 </span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">```python</span>
 </span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">from ultralytics import YOLO</span>
 </span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>
-</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">model = YOLO("runs/detect/results/training/yolo11n_baseline/weights/best.pt")</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">model = YOLO("models/yolo11n_640.pt")</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">result = model.predict("pack.jpg", conf=0.25)[0]</span>
 </span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">for box in result.boxes:</span>

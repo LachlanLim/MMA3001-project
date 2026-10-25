@@ -4,7 +4,7 @@ Measure how well each trained model works, and how much it costs to run.
 Training produced four candidate models. This script compares them
 fairly, chooses one, and gives that one a final exam on photos it has
 never been judged on. It does no training itself: it loads each saved
-model (``best.pt``) and checks photos with it, so it finishes in about a
+model from ``models/`` and checks photos with it, so it finishes in about a
 minute.
 
 ## What is measured, and why
@@ -141,8 +141,10 @@ DATASET_DIR = Path("data/Pork-Rasher-Error(Packaging)-4")
 DATA_YAML = DATASET_DIR / "data.yaml"
 """Dataset settings file listing the defect types and photo folders."""
 
-TRAINING_DIR = Path("runs/detect/results/training")
-"""Where Ultralytics saved each training run and its trained model."""
+MODELS_DIR = Path("models")
+"""The four trained models, named after their experiment (e.g.
+``yolo11n_640.pt``). Each is a copy of the ``weights/best.pt`` saved by
+its training run, so the evaluation runs without retraining."""
 
 EVALUATION_DIR = Path("evaluation")
 """Where Ultralytics saves evaluation plots. Ultralytics puts relative
@@ -155,13 +157,13 @@ PROFILES_DIR = RESULTS_DIR / "profiles"
 """Where the profiler's breakdown for each model is saved."""
 
 EXPERIMENTS = [
-    ("yolo11n_480", "YOLO11n", 480, "yolo11n_480"),
-    ("yolo11n_640", "YOLO11n", 640, "yolo11n_baseline"),
-    ("yolo11n_800", "YOLO11n", 800, "yolo11n_800"),
-    ("yolo11s_640", "YOLO11s", 640, "yolo11s_baseline"),
+    ("yolo11n_480", "YOLO11n", 480),
+    ("yolo11n_640", "YOLO11n", 640),
+    ("yolo11n_800", "YOLO11n", 800),
+    ("yolo11s_640", "YOLO11s", 640),
 ]
 """The four trained models to compare, each given as
-(experiment name, model label, resolution in pixels, training run folder)."""
+(experiment name, model label, resolution in pixels)."""
 
 SELECTED_EXPERIMENT = "yolo11n_640"
 """The model chosen from the validation results. Only this one is
@@ -332,21 +334,23 @@ def profile_inference(model, image, imgsz, name):
     return summary
 
 
-def training_hours(run_name):
+def training_hours(name):
     """
     Read the total training time from an Ultralytics results.csv.
+
+    Each training run's ``results.csv`` is kept in ``results/<name>/``.
 
     The ``time`` column holds the elapsed seconds at the end of each
     epoch. It restarts from zero when training is resumed, so each
     training session is added separately.
 
     Args:
-        run_name (str): Folder name inside ``runs/detect/results/training``.
+        name (str): Experiment name, e.g. ``"yolo11n_640"``.
 
     Returns:
         float: Training time in hours, or None if results.csv is missing.
     """
-    results_csv = TRAINING_DIR / run_name / "results.csv"
+    results_csv = RESULTS_DIR / name / "results.csv"
 
     if not results_csv.is_file():
         return None
@@ -367,7 +371,7 @@ def training_hours(run_name):
 # Main evaluation
 # --------------------------------------------------
 
-def evaluate_experiment(name, label, imgsz, run_name, images):
+def evaluate_experiment(name, label, imgsz, images):
     """
     Measure the accuracy and cost of one trained model.
 
@@ -375,16 +379,15 @@ def evaluate_experiment(name, label, imgsz, run_name, images):
         name (str): Experiment name, e.g. ``"yolo11n_640"``.
         label (str): Model label for the tables, e.g. ``"YOLO11n"``.
         imgsz (int): Input resolution in pixels.
-        run_name (str): Ultralytics training run folder.
         images (list[PIL.Image.Image]): Validation images for timing.
 
     Returns:
         dict: One row of the comparison tables.
 
     Raises:
-        FileNotFoundError: If the run has no best.pt weights.
+        FileNotFoundError: If the model file is missing from ``models/``.
     """
-    weights = TRAINING_DIR / run_name / "weights" / "best.pt"
+    weights = MODELS_DIR / f"{name}.pt"
 
     if not weights.is_file():
         raise FileNotFoundError(f"No trained weights at {weights}.")
@@ -413,7 +416,7 @@ def evaluate_experiment(name, label, imgsz, run_name, images):
     # Rate of useful computation actually achieved during the forward pass
     achieved_gflops_per_s = gflops / (timing["inference_ms"] / 1000)
 
-    hours = training_hours(run_name)
+    hours = training_hours(name)
 
     return {
         "model": label,
@@ -434,21 +437,20 @@ def evaluate_experiment(name, label, imgsz, run_name, images):
     }
 
 
-def evaluate_test_split(name, imgsz, run_name):
+def evaluate_test_split(name, imgsz):
     """
     Evaluate the selected model once on the withheld test split.
 
     Args:
         name (str): Experiment name.
         imgsz (int): Input resolution in pixels.
-        run_name (str): Ultralytics training run folder.
 
     Returns:
         list[dict]: An ``all`` row followed by one row per class that
         appears in the test split.
     """
     print(f"\n=== Final test: {name} ===")
-    model = YOLO(str(TRAINING_DIR / run_name / "weights" / "best.pt"))
+    model = YOLO(str(MODELS_DIR / f"{name}.pt"))
     metrics = validate(model, imgsz, "test", f"{name}_test", plots=True)
 
     test_images = list_images(DATASET_DIR / "test" / "images")
@@ -515,14 +517,14 @@ def main():
     # The first model run on the GPU also sets up memory that stays in use
     # afterwards. Run one model briefly first, so this one-off memory is not
     # counted against whichever model happens to be measured first.
-    _, _, imgsz, run_name = EXPERIMENTS[0]
-    warmup_model = YOLO(str(TRAINING_DIR / run_name / "weights" / "best.pt"))
+    name, _, imgsz = EXPERIMENTS[0]
+    warmup_model = YOLO(str(MODELS_DIR / f"{name}.pt"))
     warmup_model.predict(images[0], imgsz=imgsz, device=DEVICE, verbose=False)
     del warmup_model
 
     rows = {}
-    for name, label, imgsz, run_name in EXPERIMENTS:
-        rows[name] = evaluate_experiment(name, label, imgsz, run_name, images)
+    for name, label, imgsz in EXPERIMENTS:
+        rows[name] = evaluate_experiment(name, label, imgsz, images)
 
     write_csv(
         RESULTS_DIR / "model_comparison.csv",
@@ -537,7 +539,7 @@ def main():
     selected = next(e for e in EXPERIMENTS if e[0] == SELECTED_EXPERIMENT)
     write_csv(
         RESULTS_DIR / "final_test_metrics.csv",
-        evaluate_test_split(selected[0], selected[2], selected[3]),
+        evaluate_test_split(selected[0], selected[2]),
     )
 
 

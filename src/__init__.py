@@ -31,7 +31,7 @@ Once training has finished, checking a new photo takes a few lines:
 ```python
 from ultralytics import YOLO
 
-model = YOLO("runs/detect/results/training/yolo11n_baseline/weights/best.pt")
+model = YOLO("models/yolo11n_640.pt")
 result = model.predict("pack.jpg", conf=0.25)[0]
 
 for box in result.boxes:
