@@ -69,12 +69,13 @@ Each label file holds one box per line as `class_id x_center y_center width heig
 │   ├── test_reports/          pytest XML and HTML test report
 │   ├── profiles/              PyTorch profiler breakdown for each model
 │   └── *.csv                  Comparison and final test metrics
+├── models/                  The four trained models (yolo11n_640.pt is the selected one)
 ├── docs/                    HTML code documentation (pdoc)
 ├── requirements.txt
 └── LICENSE
 ```
 
-`data/`, `runs/` (Ultralytics training output) and the `.pt` model weights are ignored by Git.
+`data/` and `runs/` (Ultralytics training output) are ignored by Git. The final trained models are included in `models/`, so the evaluation can be run without retraining.
 
 ## Setup
 
@@ -106,19 +107,34 @@ Run every command from the project root.
    python src/validate_annotations.py
    python src/visualise_labels.py
    ```
-3. **Train the models.** Each run takes about 1–2 hours on a GPU.
+3. **Train the models (optional).** The trained models are already in `models/`, so you can skip to step 4. To retrain, allow about 1–2 hours per model on a GPU:
    ```bash
    python src/train_yolo11n.py
    python src/train_yolo11n_480.py
    python src/train_yolo11n_800.py
    python src/train_yolo11s.py
    ```
-   Ultralytics saves weights, metrics and plots under `runs/detect/results/training/<experiment>/`.
+   Ultralytics saves weights, metrics and plots under `runs/detect/results/training/<experiment>/`. To evaluate a new run, copy its `weights/best.pt` into `models/` as `<experiment>.pt` (e.g. `models/yolo11n_640.pt`), and its `results.csv` into `results/<experiment>/`.
 4. **Evaluate.** This compares all models on the validation split, measures their speed, memory and FLOPs, profiles where the time goes, then tests the selected model once on the test split. It takes a few minutes and does not retrain anything.
    ```bash
    python src/evaluate.py
    ```
    This writes the three CSV files in `results/`, and Ultralytics plots to `runs/detect/evaluation/`.
+5. **Choose the operating threshold.** This picks the confidence threshold for use on a line, using the validation photos only, then checks it on the test photos. It also puts a 95% confidence interval on the test score and times batch sizes 1, 8 and 32.
+   ```bash
+   python src/operating_point.py
+   ```
+
+To check a single photo with the selected model:
+
+```python
+from ultralytics import YOLO
+
+model = YOLO("models/yolo11n_640.pt")
+result = model.predict("pack.jpg", conf=0.15)[0]
+for box in result.boxes:
+    print(model.names[int(box.cls)], round(float(box.conf), 2), box.xyxy[0].tolist())
+```
 
 All experiments use 50 epochs, batch size 8 and seed 42, starting from COCO-pretrained weights.
 
